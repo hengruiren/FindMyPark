@@ -1,19 +1,19 @@
-# team000-sample
+# team020-diyuhuoniuzhanshen
 
 ## Basic Information
 
 |   Info      |        Description     |
 | ----------- | ---------------------- |
-| TeamID      |        Team-000        |
-| TeamName    |         sample         |
-| Captain     |       Abdu Alawini     |
-| Captain     |  alawini@illinois.edu  |
-| Member1     |        Kevin Pei       |
-| Member1     |   kevin2@illinois.edu  |
-| Member2     |     Ti-Chung Cheng     |
-| Member2     |  tichung3@illinois.edu |
-| Member3     |                        |
-| Member3     |                        |
+| TeamID      |        Team-020        |
+| TeamName    |   diyuhuoniuzhanshen   |
+| Captain     |        Yanqin Yu       |
+| Captain     |  yanqiny2@illinois.edu |
+| Member1     |       Kaiyang Teng     |
+| Member1     |   kteng4@illinois.edu  |
+| Member2     |      Hengrui Ren       |
+| Member2     |  hengrui6@illinois.edu |
+| Member3     |       Jieyi Zhao       |
+| Member3     |  jieyi3@illinois.edu   |
 
 ## Project Information
 
