@@ -1,11 +1,11 @@
-# team020-diyuhuoniuzhanshen
+# team020-IShowCode
 
 ## Basic Information
 
 |   Info      |        Description     |
 | ----------- | ---------------------- |
 | TeamID      |        Team-020        |
-| TeamName    |   diyuhuoniuzhanshen   |
+| TeamName    |        IShowCode       |
 | Captain     |        Yanqin Yu       |
 | Captain     |  yanqiny2@illinois.edu |
 | Member1     |       Kaiyang Teng     |
