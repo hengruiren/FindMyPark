@@ -1,8 +1,6 @@
 # Team020-diyuhuoniuzhanshen
 The project repo of Team020 diyuhuoniuzhanshen
 
-Team Member:
-yanqiny2, kteng4, hengrui6, jieyi3
 
 
 ## Permission
