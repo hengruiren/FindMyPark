@@ -110,8 +110,14 @@ class ParkController {
   // Search parks
   static async searchParks(req, res) {
     try {
-      const { name, borough, latitude, longitude, radius, limit = 20 } =
-        req.query;
+      const {
+        name,
+        borough,
+        latitude,
+        longitude,
+        radius,
+        limit = 20,
+      } = req.query;
 
       let parks;
 

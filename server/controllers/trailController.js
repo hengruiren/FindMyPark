@@ -11,10 +11,7 @@ class TrailController {
     try {
       const difficulties = await Trail.findAll({
         attributes: [
-          [
-            sequelize.fn("DISTINCT", sequelize.col("difficulty")),
-            "difficulty",
-          ],
+          [sequelize.fn("DISTINCT", sequelize.col("difficulty")), "difficulty"],
         ],
         where: {
           difficulty: { [Op.ne]: null },

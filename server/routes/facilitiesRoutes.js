@@ -18,4 +18,3 @@ router.get("/:facilityId", FacilityController.getFacilityById);
 router.get("/", FacilityController.searchFacilities);
 
 module.exports = router;
-

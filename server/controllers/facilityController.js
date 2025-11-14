@@ -11,7 +11,10 @@ class FacilityController {
     try {
       const types = await Facility.findAll({
         attributes: [
-          [sequelize.fn("DISTINCT", sequelize.col("facility_type")), "facility_type"],
+          [
+            sequelize.fn("DISTINCT", sequelize.col("facility_type")),
+            "facility_type",
+          ],
         ],
         order: [["facility_type", "ASC"]],
         raw: true,
