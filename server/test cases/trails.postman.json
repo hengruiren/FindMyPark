@@ -29,24 +29,24 @@
       },
       "3.2_SearchByDifficulty": {
         "method": "GET",
-        "url": "http://localhost:3000/api/trails?difficulty=Easy",
+        "url": "http://localhost:3000/api/trails?difficulty=1",
         "headers": {},
         "body": null,
-        "description": "Search trails by difficulty"
+        "description": "Search trails by difficulty (difficulty values: 1, 2, 3, 4)"
       },
       "3.3_SearchByParkIdAndDifficulty": {
         "method": "GET",
-        "url": "http://localhost:3000/api/trails?park_id=12345&difficulty=Moderate",
+        "url": "http://localhost:3000/api/trails?park_id=12345&difficulty=2",
         "headers": {},
         "body": null,
-        "description": "Search trails by park_id and difficulty"
+        "description": "Search trails by park_id and difficulty (difficulty values: 1, 2, 3, 4)"
       },
       "3.4_SearchWithLimit": {
         "method": "GET",
-        "url": "http://localhost:3000/api/trails?difficulty=Easy&limit=20",
+        "url": "http://localhost:3000/api/trails?difficulty=1&limit=20",
         "headers": {},
         "body": null,
-        "description": "Search trails with custom limit"
+        "description": "Search trails with custom limit (difficulty values: 1, 2, 3, 4)"
       },
       "3.5_GetAllTrails": {
         "method": "GET",
@@ -95,11 +95,11 @@
     },
     "searchByDifficulty": {
       "method": "GET",
-      "url": "http://localhost:3000/api/trails?difficulty=Easy"
+      "url": "http://localhost:3000/api/trails?difficulty=1"
     },
     "searchByParkIdAndDifficulty": {
       "method": "GET",
-      "url": "http://localhost:3000/api/trails?park_id=12345&difficulty=Moderate"
+      "url": "http://localhost:3000/api/trails?park_id=12345&difficulty=2"
     },
     "getTrailById": {
       "method": "GET",
@@ -107,4 +107,3 @@
     }
   }
 }
-

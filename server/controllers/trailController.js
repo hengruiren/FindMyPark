@@ -86,7 +86,12 @@ class TrailController {
       }
 
       if (difficulty) {
-        whereClause.difficulty = difficulty;
+        // Match by first character of difficulty field (e.g., "1", "2", "3", "4")
+        // This will match "1", "1 - Easy", "1. Easy", etc.
+        const difficultyChar = String(difficulty).trim().charAt(0);
+        whereClause.difficulty = {
+          [Op.like]: `${difficultyChar}%`,
+        };
       }
 
       const trails = await Trail.findAll({

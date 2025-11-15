@@ -63,6 +63,11 @@ class ReviewController {
             as: "Park",
             attributes: ["park_name"],
           },
+          {
+            model: Facility,
+            as: "Facility",
+            attributes: ["facility_type"],
+          },
         ],
       });
 
@@ -71,6 +76,95 @@ class ReviewController {
       }
 
       res.json(review);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Get reviews by park_id or facility_id (with optional review_id)
+  static async getReviewByParkOrFacility(req, res) {
+    try {
+      const { park_id, facility_id, review_id, limit = 50 } = req.query;
+
+      // Validate that at least park_id or facility_id is provided
+      if (!park_id && !facility_id) {
+        return res.status(400).json({
+          error: "Either park_id or facility_id must be provided",
+        });
+      }
+
+      let whereClause = {};
+
+      // If review_id is provided, filter by review_id
+      if (review_id) {
+        whereClause.review_id = review_id;
+      }
+
+      // If park_id is provided, filter by park_id
+      if (park_id) {
+        whereClause.park_id = park_id;
+      }
+
+      // If facility_id is provided, filter by facility_id
+      if (facility_id) {
+        whereClause.facility_id = facility_id;
+      }
+
+      // If review_id is provided, return single review, otherwise return array
+      if (review_id) {
+        const review = await Review.findOne({
+          where: whereClause,
+          include: [
+            {
+              model: User,
+              as: "User",
+              attributes: ["username"],
+            },
+            {
+              model: Park,
+              as: "Park",
+              attributes: ["park_name"],
+            },
+            {
+              model: Facility,
+              as: "Facility",
+              attributes: ["facility_type"],
+            },
+          ],
+        });
+
+        if (!review) {
+          return res.status(404).json({ error: "Review not found" });
+        }
+
+        return res.json(review);
+      } else {
+        // Return array of reviews
+        const reviews = await Review.findAll({
+          where: whereClause,
+          include: [
+            {
+              model: User,
+              as: "User",
+              attributes: ["username"],
+            },
+            {
+              model: Park,
+              as: "Park",
+              attributes: ["park_name"],
+            },
+            {
+              model: Facility,
+              as: "Facility",
+              attributes: ["facility_type"],
+            },
+          ],
+          order: [["create_time", "DESC"]],
+          limit: parseInt(limit),
+        });
+
+        return res.json(reviews);
+      }
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

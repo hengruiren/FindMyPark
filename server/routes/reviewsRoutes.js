@@ -6,7 +6,10 @@ const router = express.Router();
 const ReviewController = require("../controllers/reviewController");
 
 // Create review (requires authentication middleware)
-router.post("/", ReviewController.createReview);
+router.post("/createReview", ReviewController.createReview);
+
+// Get reviews by park_id or facility_id (with optional review_id) - must be before /:reviewId
+router.get("/", ReviewController.getReviewByParkOrFacility);
 
 // Get park reviews (must be before /:reviewId)
 router.get("/park/:parkId", ReviewController.getParkReviews);
@@ -27,4 +30,3 @@ router.put("/:reviewId", ReviewController.updateReview);
 router.delete("/:reviewId", ReviewController.deleteReview);
 
 module.exports = router;
-
