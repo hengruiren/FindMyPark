@@ -128,11 +128,19 @@ async function loadInitialData() {
         // Load statistics
         await loadStatistics();
 
-        // Load facilities for filtering
-        const facilitiesResponse = await fetch(`${API_BASE}/facilities`);
+        // Load facilities for filtering - get ALL facilities without limit
+        const facilitiesResponse = await fetch(`${API_BASE}/facilities?limit=10000`);
         if (!facilitiesResponse.ok) throw new Error('Failed to load facilities');
         allFacilities = await facilitiesResponse.json();
         console.log(`Loaded ${allFacilities.length} facilities`);
+        
+        // Debug: Check basketball facilities
+        const basketballFacilities = allFacilities.filter(f => f.facility_type === 'Basketball');
+        const basketballParks = new Set(basketballFacilities.map(f => {
+            const id = String(f.park_id || '').trim();
+            return id && id !== 'undefined' && id !== 'null' ? id : null;
+        }).filter(id => id));
+        console.log(`Basketball facilities: ${basketballFacilities.length}, Unique parks: ${basketballParks.size}`);
 
         // Create park-facility mapping
         createParkFacilityMapping();
@@ -161,6 +169,20 @@ async function loadInitialData() {
 function populateFacilityFilters(facilityTypes) {
     const container = document.getElementById('facilityFilters');
     
+    // Set up click handler for "All" button (already in HTML)
+    const allBtn = container.querySelector('[data-type="all"]');
+    if (allBtn) {
+        allBtn.addEventListener('click', () => {
+            // Remove active from all facility buttons
+            container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            // Add active to "All" button
+            allBtn.classList.add('active');
+            currentFilters.facilityType = 'all';
+            applyFilters();
+        });
+    }
+    
+    // Add facility type buttons
     facilityTypes.forEach(type => {
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
@@ -182,6 +204,20 @@ function populateFacilityFilters(facilityTypes) {
 function populateBoroughFilters(boroughs) {
     const container = document.getElementById('boroughFilters');
     
+    // Set up click handler for "All" button (already in HTML)
+    const allBtn = container.querySelector('[data-borough="all"]');
+    if (allBtn) {
+        allBtn.addEventListener('click', () => {
+            // Remove active from all borough buttons
+            container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            // Add active to "All" button
+            allBtn.classList.add('active');
+            currentFilters.borough = 'all';
+            applyFilters();
+        });
+    }
+    
+    // Add borough buttons
     boroughs.forEach(borough => {
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
@@ -204,10 +240,15 @@ let parkFacilityMap = {};
 
 function createParkFacilityMapping() {
     parkFacilityMap = {};
+    let skippedCount = 0;
+    
     allFacilities.forEach(facility => {
         // Normalize park_id (trim and ensure string)
         const parkId = String(facility.park_id || '').trim();
-        if (!parkId) return;
+        if (!parkId || parkId === 'undefined' || parkId === 'null') {
+            skippedCount++;
+            return;
+        }
         
         if (!parkFacilityMap[parkId]) {
             parkFacilityMap[parkId] = [];
@@ -218,7 +259,11 @@ function createParkFacilityMapping() {
     // Debug: log mapping statistics
     const parkIdsWithFacilities = Object.keys(parkFacilityMap).length;
     const totalMappedFacilities = Object.values(parkFacilityMap).reduce((sum, facilities) => sum + facilities.length, 0);
-    console.log(`Park-Facility mapping: ${parkIdsWithFacilities} parks with facilities, ${totalMappedFacilities} total facilities mapped`);
+    console.log(`Park-Facility mapping: ${parkIdsWithFacilities} parks with facilities, ${totalMappedFacilities} total facilities mapped, ${skippedCount} skipped`);
+    
+    // Debug: Check sample park_ids
+    const sampleParkIds = Object.keys(parkFacilityMap).slice(0, 5);
+    console.log(`Sample park_ids in mapping:`, sampleParkIds);
 }
 
 // Get facilities for a park (normalized lookup)
@@ -242,8 +287,12 @@ function displayParksOnMap(parks) {
     parks.forEach(park => {
         if (!park.latitude || !park.longitude) return;
 
+        // Normalize park_id for lookup
+        const normalizedParkId = String(park.park_id || '').trim();
+        if (!normalizedParkId) return;
+        
         // Get facilities for this park (with normalized lookup)
-        const facilities = getFacilitiesForPark(park.park_id);
+        const facilities = getFacilitiesForPark(normalizedParkId);
 
         // Create custom icon with better styling
         const icon = createCustomIcon(facilities.length > 0, facilities.length);

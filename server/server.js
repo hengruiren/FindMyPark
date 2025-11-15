@@ -3,6 +3,7 @@
  */
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const { testConnection } = require("./config/dbConnection");
@@ -28,26 +29,19 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// API Routes
 app.use("/api/parks", parksRoutes);
 app.use("/api/facilities", facilitiesRoutes);
 app.use("/api/trails", trailsRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/users", usersRoutes);
 
-// Root path
+// Serve static files from client directory
+app.use(express.static(path.join(__dirname, "../client")));
+
+// Root path - serve frontend
 app.get("/", (req, res) => {
-  res.json({
-    message: "FindMyPark NYC API",
-    version: "1.0.0",
-    endpoints: {
-      parks: "/api/parks",
-      facilities: "/api/facilities",
-      trails: "/api/trails",
-      reviews: "/api/reviews",
-      users: "/api/users",
-    },
-  });
+  res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
 // Health check

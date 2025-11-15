@@ -1,164 +1,170 @@
-# FindMyPark NYC - 后端 API
+# FindMyPark NYC - Backend API
 
-Express.js 后端服务器，提供 FindMyPark NYC 应用的 RESTful API。
+Express.js backend server providing RESTful API for the FindMyPark NYC application.
 
-## 项目结构
+## Project Structure
 
 ```
-server/
+Server/
 ├── config/
-│   └── database.js      # 数据库配置和连接
+│   ├── database.js      # Database configuration
+│   └── dbConnection.js  # Database connection setup
 ├── models/
-│   ├── User.js          # 用户模型
-│   ├── Park.js          # 公园模型
-│   ├── Facility.js      # 设施模型
-│   ├── Trail.js         # 步道模型
-│   └── Review.js        # 评论模型
+│   ├── User.js          # User model
+│   ├── Park.js          # Park model
+│   ├── Facility.js      # Facility model
+│   ├── Trail.js         # Trail model
+│   └── Review.js        # Review model
 ├── routes/
-│   ├── parks.js         # 公园路由
-│   ├── facilities.js    # 设施路由
-│   ├── trails.js        # 步道路由
-│   ├── reviews.js       # 评论路由
-│   └── users.js         # 用户路由
-├── server.js            # 服务器主文件
-├── package.json         # 项目依赖
-└── .env.example         # 环境变量示例
+│   ├── parksRoutes.js         # Park routes
+│   ├── facilitiesRoutes.js    # Facility routes
+│   ├── trailsRoutes.js        # Trail routes
+│   ├── reviewsRoutes.js       # Review routes
+│   └── usersRoutes.js         # User routes
+├── controllers/
+│   ├── parkController.js      # Park controller
+│   ├── facilityController.js  # Facility controller
+│   ├── trailController.js     # Trail controller
+│   ├── reviewController.js    # Review controller
+│   └── userController.js      # User controller
+├── server.js            # Main server file
+├── package.json         # Project dependencies
+└── .env                 # Environment variables
 ```
 
-## 安装和运行
+## Installation and Running
 
-### 1. 安装依赖
+### 1. Install Dependencies
 
 ```bash
-cd server
+cd Server
 npm install
 ```
 
-### 2. 配置环境变量
+### 2. Configure Environment Variables
 
-复制 `.env.example` 为 `.env` 并修改配置：
-
-```bash
-cp .env.example .env
-```
-
-编辑 `.env` 文件，设置数据库连接信息：
+Create a `.env` file in the `Server` directory with the following configuration:
 
 ```
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=NewPassword123!
+DB_PASSWORD=your_password
 DB_NAME=findmypark_nyc
 DB_PORT=3306
 PORT=3000
 ```
 
-### 3. 启动服务器
+### 3. Start the Server
 
-开发模式（自动重启）：
+Development mode (auto-restart):
 ```bash
 npm run dev
 ```
 
-生产模式：
+Production mode:
 ```bash
 npm start
 ```
 
-服务器将在 `http://localhost:3000` 启动。
+The server will start at `http://localhost:3000`.
 
-## API 端点
+## API Endpoints
 
-### 公园 (Parks)
+### Parks
 
-- `GET /api/parks` - 获取公园列表
-  - 查询参数: `name`, `borough`, `latitude`, `longitude`, `radius`, `limit`
-- `GET /api/parks/:parkId` - 获取单个公园
-  - 查询参数: `details=true` (包含设施和步道)
-- `GET /api/parks/boroughs` - 获取所有区
-- `GET /api/parks/stats` - 获取统计信息
+- `GET /api/parks` - Get list of parks
+  - Query parameters: `name`, `borough`, `latitude`, `longitude`, `radius`, `limit`
+- `GET /api/parks/:parkId` - Get a single park
+  - Query parameters: `details=true` (includes facilities and trails)
+- `GET /api/parks/boroughs` - Get all boroughs
+- `GET /api/parks/stats` - Get statistics
+- `GET /api/parks/by-facility?facilityType=...` - Get parks by facility type
 
-### 设施 (Facilities)
+### Facilities
 
-- `GET /api/facilities` - 获取设施列表
-  - 查询参数: `type`, `park_id`, `is_lighted`, `is_accessible`, `borough`, `limit`
-- `GET /api/facilities/:facilityId` - 获取单个设施
-- `GET /api/facilities/types` - 获取所有设施类型
-- `GET /api/facilities/stats` - 获取统计信息
+- `GET /api/facilities` - Get list of facilities
+  - Query parameters: `type`, `park_id`, `is_lighted`, `is_accessible`, `borough`, `limit`
+- `GET /api/facilities/:facilityId` - Get a single facility
+- `GET /api/facilities/types` - Get all facility types
+- `GET /api/facilities/stats` - Get statistics
 
-### 步道 (Trails)
+### Trails
 
-- `GET /api/trails` - 获取步道列表
-  - 查询参数: `park_id`, `difficulty`, `limit`
-- `GET /api/trails/:trailId` - 获取单个步道
-- `GET /api/trails/difficulties` - 获取所有难度级别
-- `GET /api/trails/stats` - 获取统计信息
+- `GET /api/trails` - Get list of trails
+  - Query parameters: `park_id`, `difficulty`, `limit`
+- `GET /api/trails/:trailId` - Get a single trail
+- `GET /api/trails/difficulties` - Get all difficulty levels
+- `GET /api/trails/stats` - Get statistics
 
-### 评论 (Reviews)
+### Reviews
 
-- `POST /api/reviews` - 创建评论
+- `POST /api/reviews` - Create a review
   - Body: `{ user_id, park_id?, facility_id?, rating, comment? }`
-- `GET /api/reviews/:reviewId` - 获取单个评论
-- `PUT /api/reviews/:reviewId` - 更新评论
-- `DELETE /api/reviews/:reviewId` - 删除评论
-- `GET /api/reviews/park/:parkId` - 获取公园评论
-- `GET /api/reviews/facility/:facilityId` - 获取设施评论
-- `GET /api/reviews/user/:userId` - 获取用户评论
+- `GET /api/reviews/:reviewId` - Get a single review
+- `PUT /api/reviews/:reviewId` - Update a review
+- `DELETE /api/reviews/:reviewId` - Delete a review
+- `GET /api/reviews/park/:parkId` - Get park reviews
+- `GET /api/reviews/facility/:facilityId` - Get facility reviews
+- `GET /api/reviews/user/:userId` - Get user reviews
 
-### 用户 (Users)
+### Users
 
-- `POST /api/users/register` - 注册新用户
+- `POST /api/users/register` - Register a new user
   - Body: `{ username, email, password }`
-- `POST /api/users/login` - 用户登录
+- `POST /api/users/login` - User login
   - Body: `{ username, password }`
-- `GET /api/users/:userId` - 获取用户信息
-- `PUT /api/users/:userId` - 更新用户信息
-- `DELETE /api/users/:userId` - 删除用户
+- `GET /api/users/:userId` - Get user information
+- `PUT /api/users/:userId` - Update user information
+- `DELETE /api/users/:userId` - Delete user
+- `GET /api/users/preferences` - Get user preferences
+  - Requires authentication (user_id in query or session)
+- `PUT /api/users/preferences` - Update user preferences
+  - Body: `{ favorite_facilities: [], preferred_boroughs: [], ... }`
 
-### 其他
+### Other
 
-- `GET /` - API 信息
-- `GET /health` - 健康检查
+- `GET /` - Frontend application (serves index.html)
+- `GET /health` - Health check
 
-## 使用示例
+## Usage Examples
 
-### 搜索公园
+### Search Parks
 
 ```bash
-# 按名称搜索
+# Search by name
 curl "http://localhost:3000/api/parks?name=Central&limit=10"
 
-# 按区搜索
+# Search by borough
 curl "http://localhost:3000/api/parks?borough=Manhattan&limit=20"
 
-# 附近搜索
+# Nearby search
 curl "http://localhost:3000/api/parks?latitude=40.7829&longitude=-73.9654&radius=2.0"
 ```
 
-### 获取公园详情
+### Get Park Details
 
 ```bash
-# 基本信息
+# Basic information
 curl "http://localhost:3000/api/parks/park_id_123"
 
-# 包含设施和步道
+# Include facilities and trails
 curl "http://localhost:3000/api/parks/park_id_123?details=true"
 ```
 
-### 搜索设施
+### Search Facilities
 
 ```bash
-# 搜索篮球场
+# Search basketball courts
 curl "http://localhost:3000/api/facilities?type=Basketball&limit=10"
 
-# 搜索有灯光的网球场
+# Search lighted tennis courts
 curl "http://localhost:3000/api/facilities?type=Tennis&is_lighted=true"
 
-# 搜索可访问的设施
+# Search accessible facilities
 curl "http://localhost:3000/api/facilities?is_accessible=true&borough=Manhattan"
 ```
 
-### 创建评论
+### Create Review
 
 ```bash
 curl -X POST "http://localhost:3000/api/reviews" \
@@ -171,7 +177,7 @@ curl -X POST "http://localhost:3000/api/reviews" \
   }'
 ```
 
-### 用户注册
+### User Registration
 
 ```bash
 curl -X POST "http://localhost:3000/api/users/register" \
@@ -183,27 +189,41 @@ curl -X POST "http://localhost:3000/api/users/register" \
   }'
 ```
 
-## 技术栈
+### Update User Preferences
 
-- **Node.js** - 运行环境
-- **Express.js** - Web 框架
-- **MySQL2** - MySQL 数据库驱动
-- **bcryptjs** - 密码加密
-- **CORS** - 跨域支持
-- **dotenv** - 环境变量管理
+```bash
+curl -X PUT "http://localhost:3000/api/users/preferences?user_id=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "favorite_facilities": ["Basketball", "Tennis"],
+    "preferred_boroughs": ["Manhattan", "Brooklyn"]
+  }'
+```
 
-## 注意事项
+## Technology Stack
 
-1. **密码安全**: 用户密码使用 bcrypt 进行哈希存储
-2. **SQL 注入防护**: 所有查询使用参数化查询
-3. **错误处理**: 包含完整的错误处理机制
-4. **连接池**: 使用连接池管理数据库连接
-5. **CORS**: 已启用 CORS，允许跨域请求
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **Sequelize** - ORM for MySQL
+- **MySQL2** - MySQL database driver
+- **bcryptjs** - Password hashing
+- **CORS** - Cross-origin resource sharing
+- **dotenv** - Environment variable management
 
-## 开发建议
+## Notes
 
-1. 使用 `nodemon` 进行开发，自动重启服务器
-2. 使用 Postman 或类似工具测试 API
-3. 生产环境请使用环境变量管理敏感信息
-4. 考虑添加 JWT 认证中间件保护需要认证的路由
+1. **Password Security**: User passwords are hashed using bcrypt
+2. **SQL Injection Protection**: All queries use parameterized queries through Sequelize
+3. **Error Handling**: Complete error handling mechanism included
+4. **Connection Pool**: Database connections managed through Sequelize connection pool
+5. **CORS**: CORS enabled to allow cross-origin requests
+6. **Static Files**: Server serves static files from the `../client` directory
+7. **User Preferences**: User preferences stored as JSON in the `preferences` field of the User model
 
+## Development Recommendations
+
+1. Use `nodemon` for development to auto-restart the server
+2. Use Postman or similar tools to test APIs
+3. Use environment variables to manage sensitive information in production
+4. Consider adding JWT authentication middleware to protect routes that require authentication
+5. Test database connection before starting the server
