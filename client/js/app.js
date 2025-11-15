@@ -8,6 +8,7 @@ let allParks = [];
 let allFacilities = [];
 let allTrails = [];
 let currentUser = null;
+let searchMarker = null; // Marker for searched park
 let currentFilters = {
     facilityType: 'all',
     borough: 'all',
@@ -729,8 +730,8 @@ async function showParkInfo(park, facilities = null, trails = null) {
     // Scroll to info panel
     infoPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-    // Center map on park
-    if (park.latitude && park.longitude) {
+    // Center map on park (if not already centered by search marker)
+    if (park.latitude && park.longitude && !searchMarker) {
         map.setView([parseFloat(park.latitude), parseFloat(park.longitude)], 14, {
             animate: true,
             duration: 0.5
@@ -749,6 +750,70 @@ function clearMarkers() {
         map.removeLayer(marker);
     });
     parkMarkers = [];
+}
+
+// Create Search Marker Icon (simple red dot for searched park)
+function createSearchMarkerIcon() {
+    return L.divIcon({
+        className: 'search-marker',
+        html: `<div style="
+            width: 20px;
+            height: 20px;
+            background-color: #e74c3c;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        "></div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        popupAnchor: [0, -10]
+    });
+}
+
+// Add or update search marker
+function addSearchMarker(park) {
+    // Remove existing search marker
+    if (searchMarker) {
+        map.removeLayer(searchMarker);
+        searchMarker = null;
+    }
+    
+    if (!park.latitude || !park.longitude) return;
+    
+    // Create search marker with special icon
+    searchMarker = L.marker([parseFloat(park.latitude), parseFloat(park.longitude)], {
+        icon: createSearchMarkerIcon(),
+        zIndexOffset: 1000 // Make sure it's on top
+    });
+    
+    // Add popup
+    const facilities = getFacilitiesForPark(park.park_id);
+    const trails = getTrailsForPark(park.park_id);
+    const popupContent = createPopupContent(park, facilities, trails);
+    searchMarker.bindPopup(popupContent, {
+        maxWidth: 300,
+        className: 'custom-popup search-popup'
+    });
+    
+    // Add to map
+    searchMarker.addTo(map);
+    
+    // Open popup
+    searchMarker.openPopup();
+    
+    // Center map on searched park with zoom
+    map.setView([parseFloat(park.latitude), parseFloat(park.longitude)], 15, {
+        animate: true,
+        duration: 0.8
+    });
+}
+
+// Remove search marker
+function removeSearchMarker() {
+    if (searchMarker) {
+        map.removeLayer(searchMarker);
+        searchMarker = null;
+    }
 }
 
 // Load Statistics
@@ -924,16 +989,19 @@ async function selectParkFromSearch(park) {
     // Apply filters (without search term)
     applyFilters();
     
-    // Find and highlight the marker
+    // Add special search marker to highlight the searched park
+    addSearchMarker(park);
+    
+    // Also highlight the regular marker if it exists
     const markerData = parkMarkers.find(({ park: p }) => p.park_id === park.park_id);
     if (markerData) {
-        markerData.marker.openPopup();
         // Highlight marker
         const parkFacilities = getFacilitiesForPark(park.park_id);
-        markerData.marker.setIcon(createCustomIcon(true, parkFacilities.length, true));
+        const parkTrails = getTrailsForPark(park.park_id);
+        markerData.marker.setIcon(createCustomIcon(parkFacilities.length > 0, parkFacilities.length, true, parkTrails.length > 0));
         setTimeout(() => {
-            markerData.marker.setIcon(createCustomIcon(parkFacilities.length > 0, parkFacilities.length));
-        }, 2000);
+            markerData.marker.setIcon(createCustomIcon(parkFacilities.length > 0, parkFacilities.length, false, parkTrails.length > 0));
+        }, 3000);
     }
 }
 
@@ -942,12 +1010,13 @@ function clearFilters() {
     currentFilters = {
         facilityType: 'all',
         borough: 'all',
-        searchTerm: ''
+        searchTerm: '',
+        showTrails: 'all'
     };
 
     // Reset UI
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        if (btn.dataset.type === 'all' || btn.dataset.borough === 'all') {
+        if (btn.dataset.type === 'all' || btn.dataset.borough === 'all' || btn.dataset.trail === 'all') {
             btn.classList.add('active');
         } else {
             btn.classList.remove('active');
@@ -956,6 +1025,10 @@ function clearFilters() {
 
     document.getElementById('parkSearch').value = '';
     document.getElementById('searchResults').classList.remove('show');
+    
+    // Remove search marker
+    removeSearchMarker();
+    
     applyFilters();
 }
 

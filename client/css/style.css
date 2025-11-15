@@ -816,6 +816,17 @@ body {
     to { transform: rotate(360deg); }
 }
 
+/* Search Marker Styles */
+.search-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.search-popup .leaflet-popup-content-wrapper {
+    border: 2px solid #e74c3c;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
 /* Custom Popup Styles */
 .leaflet-popup-content-wrapper {
     border-radius: 12px;
