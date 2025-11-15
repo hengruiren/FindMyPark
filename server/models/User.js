@@ -31,6 +31,18 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
+    preferences: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: null,
+      get() {
+        const rawValue = this.getDataValue('preferences');
+        return rawValue ? JSON.parse(rawValue) : null;
+      },
+      set(value) {
+        this.setDataValue('preferences', value ? JSON.stringify(value) : null);
+      },
+    },
   },
   {
     tableName: "User",

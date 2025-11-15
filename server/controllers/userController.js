@@ -101,7 +101,67 @@ class UserController {
         return res.status(404).json({ error: "User not found" });
       }
 
-      res.json(user);
+      const userData = user.toJSON();
+      // Parse preferences if exists
+      if (userData.preferences && typeof userData.preferences === 'string') {
+        try {
+          userData.preferences = JSON.parse(userData.preferences);
+        } catch (e) {
+          userData.preferences = null;
+        }
+      }
+
+      res.json(userData);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Get user preferences
+  static async getUserPreferences(req, res) {
+    try {
+      const { username } = req.params;
+      const user = await User.findOne({
+        where: { username },
+        attributes: ['user_id', 'username', 'preferences'],
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userData = user.toJSON();
+      const preferences = userData.preferences ? 
+        (typeof userData.preferences === 'string' ? JSON.parse(userData.preferences) : userData.preferences) : 
+        null;
+
+      res.json({ preferences });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Update user preferences
+  static async updateUserPreferences(req, res) {
+    try {
+      const { username } = req.params;
+      const { preferences } = req.body;
+
+      if (!preferences || typeof preferences !== 'object') {
+        return res.status(400).json({ error: "Invalid preferences format" });
+      }
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      await User.update(
+        { preferences: JSON.stringify(preferences) },
+        { where: { username } }
+      );
+
+      res.json({ message: "Preferences updated successfully", preferences });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -139,13 +199,18 @@ class UserController {
       }
 
       // Only allow specific fields to be updated
-      const allowedFields = ["username", "email", "password_hash"];
+      const allowedFields = ["username", "email", "password_hash", "preferences"];
       const updateData = {};
       allowedFields.forEach((field) => {
         if (updates[field] !== undefined) {
           updateData[field] = updates[field];
         }
       });
+
+      // Handle preferences as JSON string
+      if (updates.preferences && typeof updates.preferences === 'object') {
+        updateData.preferences = JSON.stringify(updates.preferences);
+      }
 
       if (Object.keys(updateData).length === 0) {
         return res.status(400).json({ error: "No valid fields to update" });

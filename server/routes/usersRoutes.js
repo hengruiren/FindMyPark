@@ -20,6 +20,12 @@ router.get("/email/:email", UserController.getUserByEmail);
 // Get user by username
 router.get("/:username", UserController.getUserByUsername);
 
+// Get user preferences
+router.get("/:username/preferences", UserController.getUserPreferences);
+
+// Update user preferences
+router.put("/:username/preferences", UserController.updateUserPreferences);
+
 // Update user information (requires authentication middleware)
 router.put("/:username", UserController.updateUser);
 

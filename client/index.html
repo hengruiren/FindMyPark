@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindMyPark NYC - New York Parks Map</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="images/logo.png" alt="FindMyPark" class="logo" onerror="this.style.display='none';">
+                <h1>FindMyPark</h1>
+            </div>
+            <div class="user-section" id="userSection">
+                <button id="settingsBtn" class="auth-btn settings-btn" style="display: none;">Settings</button>
+                <button id="loginBtn" class="auth-btn login-btn">Login</button>
+                <button id="registerBtn" class="auth-btn register-btn">Register</button>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <span id="usernameDisplay"></span>
+                    <button id="logoutBtn" class="auth-btn logout-btn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+            <div id="registerError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content large-modal">
+            <span class="close">&times;</span>
+            <h2>User Settings</h2>
+            <form id="settingsForm">
+                <div class="settings-section">
+                    <h3>🏃 Favorite Sports/Facilities</h3>
+                    <p class="section-description">Select your favorite sports and facilities to get personalized recommendations</p>
+                    <div class="facility-checkboxes" id="favoriteFacilities">
+                        <!-- Dynamic checkboxes will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📍 Preferred Boroughs</h3>
+                    <p class="section-description">Select your preferred boroughs to focus your search</p>
+                    <div class="borough-checkboxes" id="preferredBoroughs">
+                        <!-- Dynamic checkboxes will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>⚙️ Display Preferences</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="showOnlyFavorites">
+                            Only show parks with my favorite facilities
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="prioritizePreferredBoroughs">
+                            Prioritize parks in my preferred boroughs
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Save Settings</button>
+            </form>
+            <div id="settingsError" class="error-message"></div>
+            <div id="settingsSuccess" class="success-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <!-- Search Section -->
+            <div class="search-section">
+                <h2>🔍 Search Parks</h2>
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="parkSearch" 
+                        placeholder="Enter park name..." 
+                        class="search-input"
+                        autocomplete="off"
+                    >
+                    <button id="searchBtn" class="search-btn">Search</button>
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <h2>🏷️ Facility Type</h2>
+                <div class="filter-buttons" id="facilityFilters">
+                    <button class="filter-btn active" data-type="all">All</button>
+                    <!-- Dynamic buttons will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Borough Filter -->
+            <div class="filter-section">
+                <h2>📍 Borough</h2>
+                <div class="filter-buttons" id="boroughFilters">
+                    <button class="filter-btn active" data-borough="all">All</button>
+                    <!-- Dynamic buttons will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <h2>📊 Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Parks</span>
+                        <span class="stat-value" id="totalParks">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Displayed</span>
+                        <span class="stat-value" id="displayedParks">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Facilities</span>
+                        <span class="stat-value" id="totalFacilities">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel" id="infoPanel" style="display: none;">
+                <h2>📋 Park Information</h2>
+                <div id="parkInfo"></div>
+            </div>
+        </aside>
+
+        <!-- Map Container (Right Side) -->
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-controls">
+                <button id="resetViewBtn" class="control-btn">Reset View</button>
+                <button id="clearFiltersBtn" class="control-btn">Clear Filters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="js/app.js"></script>
+</body>
+</html>
