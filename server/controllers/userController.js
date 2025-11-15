@@ -74,11 +74,45 @@ class UserController {
     }
   }
 
-  // Get user by ID
-  static async getUserById(req, res) {
+  // Get all users
+  static async getAllUsers(req, res) {
     try {
-      const { userId } = req.params;
-      const user = await User.findByPk(userId, {
+      const users = await User.findAll({
+        attributes: { exclude: ["password_hash"] },
+        order: [["user_id", "ASC"]],
+      });
+
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Get user by username
+  static async getUserByUsername(req, res) {
+    try {
+      const { username } = req.params;
+      const user = await User.findOne({
+        where: { username },
+        attributes: { exclude: ["password_hash"] },
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Get user by email
+  static async getUserByEmail(req, res) {
+    try {
+      const { email } = req.params;
+      const user = await User.findOne({
+        where: { email },
         attributes: { exclude: ["password_hash"] },
       });
 
@@ -95,7 +129,7 @@ class UserController {
   // Update user information
   static async updateUser(req, res) {
     try {
-      const { userId } = req.params;
+      const { username } = req.params;
       const updates = req.body;
 
       // Hash password if updating
@@ -118,7 +152,7 @@ class UserController {
       }
 
       const [updated] = await User.update(updateData, {
-        where: { user_id: userId },
+        where: { username },
       });
 
       if (updated === 0) {
@@ -134,8 +168,8 @@ class UserController {
   // Delete user
   static async deleteUser(req, res) {
     try {
-      const { userId } = req.params;
-      const deleted = await User.destroy({ where: { user_id: userId } });
+      const { username } = req.params;
+      const deleted = await User.destroy({ where: { username } });
 
       if (deleted === 0) {
         return res.status(404).json({ error: "User not found" });

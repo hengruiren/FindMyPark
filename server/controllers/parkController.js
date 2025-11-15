@@ -107,69 +107,67 @@ class ParkController {
     }
   }
 
-  // Search parks
+  // Search parks by name and/or borough
   static async searchParks(req, res) {
     try {
-      const {
-        name,
-        borough,
-        latitude,
-        longitude,
-        radius,
-        limit = 20,
-      } = req.query;
+      const { name, borough, limit = 20 } = req.query;
 
-      let parks;
+      const whereClause = {};
 
-      if (latitude && longitude) {
-        // Nearby search using raw SQL for distance calculation
-        const radiusKm = parseFloat(radius) || 5.0;
-        parks = await sequelize.query(
-          `
-          SELECT *, 
-            (6371 * acos(
-              cos(radians(:lat)) * cos(radians(latitude)) *
-              cos(radians(longitude) - radians(:lng)) +
-              sin(radians(:lat)) * sin(radians(latitude))
-            )) AS distance_km
-          FROM Park
-          HAVING distance_km <= :radius
-          ORDER BY distance_km
-          LIMIT :limit
-        `,
-          {
-            replacements: {
-              lat: parseFloat(latitude),
-              lng: parseFloat(longitude),
-              radius: radiusKm,
-              limit: parseInt(limit),
-            },
-            type: sequelize.QueryTypes.SELECT,
-          }
-        );
-      } else if (borough) {
-        // Search by borough
-        parks = await Park.findAll({
-          where: { borough },
-          order: [["park_name", "ASC"]],
-          limit: parseInt(limit),
-        });
-      } else if (name) {
-        // Search by name
-        parks = await Park.findAll({
-          where: {
-            park_name: { [Op.like]: `%${name}%` },
-          },
-          order: [["park_name", "ASC"]],
-          limit: parseInt(limit),
-        });
-      } else {
-        // Default: return first 20
-        parks = await Park.findAll({
-          order: [["park_name", "ASC"]],
-          limit: parseInt(limit),
-        });
+      if (name) {
+        whereClause.park_name = name;
       }
+
+      if (borough) {
+        whereClause.borough = borough;
+      }
+
+      const parks = await Park.findAll({
+        where: whereClause,
+        order: [["park_name", "ASC"]],
+        limit: parseInt(limit),
+      });
+
+      res.json(parks);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Get parks by facility type
+  static async getParksByFacilityType(req, res) {
+    try {
+      const { facilityType, limit = 50 } = req.query;
+
+      if (!facilityType) {
+        return res
+          .status(400)
+          .json({ error: "facilityType parameter is required" });
+      }
+
+      // First get distinct park_ids that have this facility type
+      const facilities = await Facility.findAll({
+        where: { facility_type: facilityType },
+        attributes: [
+          [sequelize.fn("DISTINCT", sequelize.col("park_id")), "park_id"],
+        ],
+        raw: true,
+      });
+
+      const parkIds = facilities.map((f) => f.park_id);
+
+      if (parkIds.length === 0) {
+        return res.json([]);
+      }
+
+      // Then get the parks
+      const parks = await Park.findAll({
+        where: {
+          park_id: { [Op.in]: parkIds },
+        },
+        order: [["park_name", "ASC"]],
+        limit: parseInt(limit),
+      });
 
       res.json(parks);
     } catch (error) {

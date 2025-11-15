@@ -1,0 +1,180 @@
+{
+  "baseUrl": "http://localhost:3000/api/facilities",
+  "testCases": {
+    "1_GET_TYPES": {
+      "1.1_GetAllFacilityTypes": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities/types",
+        "headers": {},
+        "body": null,
+        "description": "Get all distinct facility types"
+      }
+    },
+    "2_GET_STATS": {
+      "2.1_GetStatistics": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities/stats",
+        "headers": {},
+        "body": null,
+        "description": "Get facility statistics (count and avg rating by type)"
+      }
+    },
+    "3_SEARCH_FACILITIES": {
+      "3.1_SearchByType": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?type=Basketball",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities by type"
+      },
+      "3.2_SearchByParkId": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?park_id=12345",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities by park_id (replace 12345 with actual park_id)"
+      },
+      "3.3_SearchByIsLighted": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?is_lighted=true",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities that are lighted"
+      },
+      "3.4_SearchByIsAccessible": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?is_accessible=true",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities that are accessible (ADA)"
+      },
+      "3.5_SearchByBorough": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?borough=Manhattan",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities by borough"
+      },
+      "3.6_SearchByTypeAndBorough": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?type=Basketball&borough=Brooklyn",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities by type and borough"
+      },
+      "3.7_SearchByTypeAndIsLighted": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?type=Tennis&is_lighted=true",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities by type and lighting"
+      },
+      "3.8_SearchByTypeAndIsAccessible": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?type=Soccer&is_accessible=true",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities by type and accessibility"
+      },
+      "3.9_SearchMultipleFilters": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?type=Basketball&borough=Manhattan&is_lighted=true&is_accessible=true",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities with multiple filters"
+      },
+      "3.10_SearchWithLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?type=Basketball&limit=20",
+        "headers": {},
+        "body": null,
+        "description": "Search facilities with custom limit"
+      },
+      "3.11_GetAllFacilities": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities",
+        "headers": {},
+        "body": null,
+        "description": "Get all facilities (default limit 50)"
+      },
+      "3.12_GetAllFacilitiesWithLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities?limit=100",
+        "headers": {},
+        "body": null,
+        "description": "Get all facilities with custom limit"
+      }
+    },
+    "4_GET_FACILITY_BY_ID": {
+      "4.1_GetFacilityById": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities/1",
+        "headers": {},
+        "body": null,
+        "description": "Get facility by ID with park information (replace 1 with actual facility_id)"
+      },
+      "4.2_FacilityNotFound": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/facilities/99999",
+        "headers": {},
+        "body": null,
+        "description": "Facility not found (should return 404 error)"
+      }
+    }
+  },
+  "facilityTypes": [
+    "Basketball",
+    "Tennis",
+    "Soccer",
+    "Baseball",
+    "Softball",
+    "Football",
+    "Volleyball",
+    "Track",
+    "Handball",
+    "Pickleball",
+    "Hockey",
+    "Cricket",
+    "Rugby",
+    "Bocce",
+    "Lacrosse",
+    "Frisbee",
+    "Kickball",
+    "Netball"
+  ],
+  "boroughs": ["Manhattan", "Brooklyn", "Queens", "The Bronx", "Staten Island"],
+  "quickCopy": {
+    "getTypes": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities/types"
+    },
+    "getStats": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities/stats"
+    },
+    "searchByType": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities?type=Basketball"
+    },
+    "searchByBorough": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities?borough=Manhattan"
+    },
+    "searchByTypeAndBorough": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities?type=Basketball&borough=Brooklyn"
+    },
+    "searchByIsLighted": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities?is_lighted=true"
+    },
+    "searchByIsAccessible": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities?is_accessible=true"
+    },
+    "getFacilityById": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/facilities/1"
+    }
+  }
+}

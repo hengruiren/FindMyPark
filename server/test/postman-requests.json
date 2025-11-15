@@ -1,0 +1,146 @@
+{
+  "1_REGISTER": {
+    "1.1_Success": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/register",
+      "body": {
+        "username": "testuser001",
+        "email": "testuser001@example.com",
+        "password": "SecurePassword123!"
+      }
+    },
+    "1.2_MissingFields": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/register",
+      "body": {
+        "username": "testuser",
+        "password": "password123"
+      }
+    },
+    "1.3_DuplicateUsername": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/register",
+      "body": {
+        "username": "testuser001",
+        "email": "different@example.com",
+        "password": "password123"
+      }
+    },
+    "1.4_DuplicateEmail": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/register",
+      "body": {
+        "username": "differentuser",
+        "email": "testuser001@example.com",
+        "password": "password123"
+      }
+    }
+  },
+  "2_LOGIN": {
+    "2.1_Success": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/login",
+      "body": {
+        "username": "testuser001",
+        "password": "SecurePassword123!"
+      }
+    },
+    "2.2_MissingFields": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/login",
+      "body": {
+        "username": "testuser001"
+      }
+    },
+    "2.3_InvalidUsername": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/login",
+      "body": {
+        "username": "nonexistentuser",
+        "password": "SecurePassword123!"
+      }
+    },
+    "2.4_InvalidPassword": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/login",
+      "body": {
+        "username": "testuser001",
+        "password": "WrongPassword123!"
+      }
+    }
+  },
+  "3_GET_USER": {
+    "3.1_GetAllUsers": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/users"
+    },
+    "3.2_GetUserByUsername": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/users/testuser001"
+    },
+    "3.3_GetUserByEmail": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/users/email/testuser001@example.com"
+    },
+    "3.4_GetUserByUsername_NotFound": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/users/nonexistentuser"
+    }
+  },
+  "4_UPDATE_USER": {
+    "4.1_UpdateUsername": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/testuser001",
+      "body": {
+        "username": "updatedusername001"
+      }
+    },
+    "4.2_UpdateEmail": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/testuser001",
+      "body": {
+        "email": "updatedemail@example.com"
+      }
+    },
+    "4.3_UpdatePassword": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/testuser001",
+      "body": {
+        "password": "NewSecurePassword456!"
+      }
+    },
+    "4.4_UpdateMultiple": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/testuser001",
+      "body": {
+        "username": "newusername",
+        "email": "newemail@example.com",
+        "password": "NewPassword789!"
+      }
+    },
+    "4.5_NoValidFields": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/testuser001",
+      "body": {
+        "invalidField": "some value"
+      }
+    },
+    "4.6_NotFound": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/nonexistentuser",
+      "body": {
+        "username": "newname"
+      }
+    }
+  },
+  "5_DELETE_USER": {
+    "5.1_Success": {
+      "method": "DELETE",
+      "url": "http://localhost:3000/api/users/testuser001"
+    },
+    "5.2_NotFound": {
+      "method": "DELETE",
+      "url": "http://localhost:3000/api/users/nonexistentuser"
+    }
+  }
+}

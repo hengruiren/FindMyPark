@@ -1,0 +1,299 @@
+{
+  "baseUrl": "http://localhost:3000/api/reviews",
+  "testCases": {
+    "1_CREATE_REVIEW": {
+      "1.1_CreateParkReview": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/reviews",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user_id": 1,
+          "park_id": "12345",
+          "rating": 4.5,
+          "comment": "Great park with beautiful scenery!"
+        },
+        "description": "Create a review for a park (NOTE: Replace user_id and park_id with actual IDs from your database. Get park_id from GET /api/parks, get user_id from GET /api/users or after registration)"
+      },
+      "1.2_CreateFacilityReview": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/reviews",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user_id": 1,
+          "facility_id": 10,
+          "rating": 5.0,
+          "comment": "Excellent basketball court!"
+        },
+        "description": "Create a review for a facility (NOTE: Replace user_id and facility_id with actual IDs from your database. Get facility_id from GET /api/facilities)"
+      },
+      "1.3_CreateReviewWithoutComment": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/reviews",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user_id": 1,
+          "park_id": "12345",
+          "rating": 3.5
+        },
+        "description": "Create a review without comment (NOTE: Replace user_id and park_id with actual IDs)"
+      },
+      "1.4_MissingRequiredFields": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/reviews",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user_id": 1,
+          "rating": 4.0
+        },
+        "description": "Missing park_id or facility_id (should return 400 error)"
+      },
+      "1.5_InvalidRatingTooHigh": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/reviews",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user_id": 1,
+          "park_id": "12345",
+          "rating": 6.0
+        },
+        "description": "Rating exceeds maximum (should return 400 error) - NOTE: Replace IDs with actual values"
+      },
+      "1.6_InvalidRatingTooLow": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/reviews",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user_id": 1,
+          "park_id": "12345",
+          "rating": -1.0
+        },
+        "description": "Rating below minimum (should return 400 error) - NOTE: Replace IDs with actual values"
+      }
+    },
+    "2_GET_REVIEW_BY_ID": {
+      "2.1_GetReviewById": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/1",
+        "headers": {},
+        "body": null,
+        "description": "Get review by ID with user and park information (replace 1 with actual review_id)"
+      },
+      "2.2_ReviewNotFound": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/99999",
+        "headers": {},
+        "body": null,
+        "description": "Review not found (should return 404 error)"
+      }
+    },
+    "3_GET_PARK_REVIEWS": {
+      "3.1_GetParkReviews": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/park/12345",
+        "headers": {},
+        "body": null,
+        "description": "Get all reviews for a park (replace 12345 with actual park_id)"
+      },
+      "3.2_GetParkReviewsWithLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/park/12345?limit=20",
+        "headers": {},
+        "body": null,
+        "description": "Get park reviews with custom limit"
+      }
+    },
+    "4_GET_FACILITY_REVIEWS": {
+      "4.1_GetFacilityReviews": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/facility/10",
+        "headers": {},
+        "body": null,
+        "description": "Get all reviews for a facility (replace 10 with actual facility_id)"
+      },
+      "4.2_GetFacilityReviewsWithLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/facility/10?limit=20",
+        "headers": {},
+        "body": null,
+        "description": "Get facility reviews with custom limit"
+      }
+    },
+    "5_GET_USER_REVIEWS": {
+      "5.1_GetUserReviews": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/user/testuser001",
+        "headers": {},
+        "body": null,
+        "description": "Get all reviews by a user (replace testuser001 with actual username)"
+      },
+      "5.2_GetUserReviewsWithLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/user/testuser001?limit=20",
+        "headers": {},
+        "body": null,
+        "description": "Get user reviews with custom limit"
+      },
+      "5.3_UserNotFound": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/reviews/user/nonexistentuser",
+        "headers": {},
+        "body": null,
+        "description": "User not found (should return 404 error)"
+      }
+    },
+    "6_UPDATE_REVIEW": {
+      "6.1_UpdateRating": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/reviews/1",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "rating": 5.0
+        },
+        "description": "Update review rating (replace 1 with actual review_id)"
+      },
+      "6.2_UpdateComment": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/reviews/1",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "comment": "Updated comment: This is even better than I thought!"
+        },
+        "description": "Update review comment"
+      },
+      "6.3_UpdateRatingAndComment": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/reviews/1",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "rating": 4.5,
+          "comment": "Updated: Great experience overall!"
+        },
+        "description": "Update both rating and comment"
+      },
+      "6.4_NoFieldsToUpdate": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/reviews/1",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {},
+        "description": "No fields to update (should return 400 error)"
+      },
+      "6.5_InvalidRatingTooHigh": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/reviews/1",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "rating": 6.0
+        },
+        "description": "Rating exceeds maximum (should return 400 error)"
+      },
+      "6.6_ReviewNotFound": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/reviews/99999",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "rating": 4.0
+        },
+        "description": "Review not found (should return 404 error)"
+      }
+    },
+    "7_DELETE_REVIEW": {
+      "7.1_DeleteReview": {
+        "method": "DELETE",
+        "url": "http://localhost:3000/api/reviews/1",
+        "headers": {},
+        "body": null,
+        "description": "Delete a review (replace 1 with actual review_id)"
+      },
+      "7.2_ReviewNotFound": {
+        "method": "DELETE",
+        "url": "http://localhost:3000/api/reviews/99999",
+        "headers": {},
+        "body": null,
+        "description": "Review not found (should return 404 error)"
+      }
+    }
+  },
+  "quickCopy": {
+    "createParkReview": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/reviews",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "user_id": 1,
+        "park_id": "12345",
+        "rating": 4.5,
+        "comment": "Great park!"
+      }
+    },
+    "createFacilityReview": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/reviews",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "user_id": 1,
+        "facility_id": 10,
+        "rating": 5.0,
+        "comment": "Excellent facility!"
+      }
+    },
+    "getReviewById": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/reviews/1"
+    },
+    "getParkReviews": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/reviews/park/12345"
+    },
+    "getFacilityReviews": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/reviews/facility/10"
+    },
+    "getUserReviews": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/reviews/user/testuser001"
+    },
+    "updateReview": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/reviews/1",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "rating": 5.0,
+        "comment": "Updated comment"
+      }
+    },
+    "deleteReview": {
+      "method": "DELETE",
+      "url": "http://localhost:3000/api/reviews/1"
+    }
+  }
+}

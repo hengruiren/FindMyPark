@@ -15,6 +15,10 @@ const Facility = sequelize.define(
     park_id: {
       type: DataTypes.STRING(50),
       allowNull: false,
+      references: {
+        model: "Park",
+        key: "park_id",
+      },
     },
     facility_type: {
       type: DataTypes.ENUM(

@@ -11,11 +11,13 @@ router.get("/boroughs", ParkController.getBoroughs);
 // Get statistics
 router.get("/stats", ParkController.getStats);
 
-// Get park by ID
-router.get("/:parkId", ParkController.getParkById);
+// Get parks by facility type (must be before /:parkId)
+router.get("/by-facility", ParkController.getParksByFacilityType);
 
-// Search parks
+// Search parks (must be before /:parkId)
 router.get("/", ParkController.searchParks);
 
-module.exports = router;
+// Get park by ID (must be after specific routes)
+router.get("/:parkId", ParkController.getParkById);
 
+module.exports = router;

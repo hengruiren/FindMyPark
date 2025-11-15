@@ -32,10 +32,10 @@ class ReviewController {
 
       // Update related ratings
       if (park_id) {
-        await this.updateParkRating(park_id);
+        await ReviewController.updateParkRating(park_id);
       }
       if (facility_id) {
-        await this.updateFacilityRating(facility_id);
+        await ReviewController.updateFacilityRating(facility_id);
       }
 
       res.status(201).json({
@@ -108,10 +108,10 @@ class ReviewController {
       const review = await Review.findByPk(reviewId);
       if (review) {
         if (review.park_id) {
-          await this.updateParkRating(review.park_id);
+          await ReviewController.updateParkRating(review.park_id);
         }
         if (review.facility_id) {
-          await this.updateFacilityRating(review.facility_id);
+          await ReviewController.updateFacilityRating(review.facility_id);
         }
       }
 
@@ -138,10 +138,10 @@ class ReviewController {
       // Update related ratings
       if (review) {
         if (review.park_id) {
-          await this.updateParkRating(review.park_id);
+          await ReviewController.updateParkRating(review.park_id);
         }
         if (review.facility_id) {
-          await this.updateFacilityRating(review.facility_id);
+          await ReviewController.updateFacilityRating(review.facility_id);
         }
       }
 
@@ -200,10 +200,17 @@ class ReviewController {
   // Get user reviews
   static async getUserReviews(req, res) {
     try {
-      const { userId } = req.params;
+      const { username } = req.params;
       const limit = parseInt(req.query.limit) || 50;
+
+      // First find user by username
+      const user = await User.findOne({ where: { username } });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
       const reviews = await Review.findAll({
-        where: { user_id: userId },
+        where: { user_id: user.user_id },
         include: [
           {
             model: Park,

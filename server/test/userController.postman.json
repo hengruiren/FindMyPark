@@ -1,0 +1,274 @@
+{
+  "baseUrl": "http://localhost:3000/api/users",
+  "testCases": {
+    "1_REGISTER": {
+      "1.1_Success": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/register",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "testuser001",
+          "email": "testuser001@example.com",
+          "password": "SecurePassword123!"
+        },
+        "description": "Register a new user"
+      },
+      "1.2_MissingFields": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/register",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "testuser",
+          "password": "password123"
+        },
+        "description": "Missing required fields (should return 400 error)"
+      },
+      "1.3_DuplicateUsername": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/register",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "testuser001",
+          "email": "different@example.com",
+          "password": "password123"
+        },
+        "description": "Duplicate username (should return 400 error)"
+      },
+      "1.4_DuplicateEmail": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/register",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "differentuser",
+          "email": "testuser001@example.com",
+          "password": "password123"
+        },
+        "description": "Duplicate email (should return 400 error)"
+      }
+    },
+    "2_LOGIN": {
+      "2.1_Success": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "testuser001",
+          "password": "SecurePassword123!"
+        },
+        "description": "User login"
+      },
+      "2.2_MissingFields": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "testuser001"
+        },
+        "description": "Missing password (should return 400 error)"
+      },
+      "2.3_InvalidUsername": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "nonexistentuser",
+          "password": "SecurePassword123!"
+        },
+        "description": "Invalid username (should return 401 error)"
+      },
+      "2.4_InvalidPassword": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/users/login",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "testuser001",
+          "password": "WrongPassword123!"
+        },
+        "description": "Invalid password (should return 401 error)"
+      }
+    },
+    "3_GET_USER": {
+      "3.1_GetAllUsers": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/users",
+        "headers": {},
+        "body": null,
+        "description": "Get all users"
+      },
+      "3.2_GetUserByUsername": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/users/testuser001",
+        "headers": {},
+        "body": null,
+        "description": "Get user by username"
+      },
+      "3.3_GetUserByEmail": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/users/email/testuser001@example.com",
+        "headers": {},
+        "body": null,
+        "description": "Get user by email"
+      },
+      "3.4_UserNotFound": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/users/nonexistentuser",
+        "headers": {},
+        "body": null,
+        "description": "User not found (should return 404 error)"
+      }
+    },
+    "4_UPDATE_USER": {
+      "4.1_UpdateUsername": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/users/testuser001",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "updatedusername001"
+        },
+        "description": "Update username"
+      },
+      "4.2_UpdateEmail": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/users/testuser001",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "updatedemail@example.com"
+        },
+        "description": "Update email"
+      },
+      "4.3_UpdatePassword": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/users/testuser001",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "password": "NewSecurePassword456!"
+        },
+        "description": "Update password"
+      },
+      "4.4_UpdateMultipleFields": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/users/testuser001",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "newusername",
+          "email": "newemail@example.com",
+          "password": "NewPassword789!"
+        },
+        "description": "Update multiple fields"
+      },
+      "4.5_NoValidFields": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/users/testuser001",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "invalidField": "some value"
+        },
+        "description": "No valid fields to update (should return 400 error)"
+      },
+      "4.6_UserNotFound": {
+        "method": "PUT",
+        "url": "http://localhost:3000/api/users/nonexistentuser",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "newname"
+        },
+        "description": "User not found (should return 404 error)"
+      }
+    },
+    "5_DELETE_USER": {
+      "5.1_Success": {
+        "method": "DELETE",
+        "url": "http://localhost:3000/api/users/testuser001",
+        "headers": {},
+        "body": null,
+        "description": "Delete user"
+      },
+      "5.2_UserNotFound": {
+        "method": "DELETE",
+        "url": "http://localhost:3000/api/users/nonexistentuser",
+        "headers": {},
+        "body": null,
+        "description": "User not found (should return 404 error)"
+      }
+    }
+  },
+  "quickCopy": {
+    "register": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/register",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "username": "testuser001",
+        "email": "testuser001@example.com",
+        "password": "SecurePassword123!"
+      }
+    },
+    "login": {
+      "method": "POST",
+      "url": "http://localhost:3000/api/users/login",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "username": "testuser001",
+        "password": "SecurePassword123!"
+      }
+    },
+    "getAllUsers": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/users"
+    },
+    "getUserByUsername": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/users/testuser001"
+    },
+    "getUserByEmail": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/users/email/testuser001@example.com"
+    },
+    "updateUser": {
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/testuser001",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "username": "updatedusername001"
+      }
+    },
+    "deleteUser": {
+      "method": "DELETE",
+      "url": "http://localhost:3000/api/users/testuser001"
+    }
+  }
+}

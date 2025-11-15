@@ -15,6 +15,10 @@ const Trail = sequelize.define(
     park_id: {
       type: DataTypes.STRING(50),
       allowNull: false,
+      references: {
+        model: "Park",
+        key: "park_id",
+      },
     },
     trail_name: {
       type: DataTypes.STRING(200),

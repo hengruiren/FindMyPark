@@ -15,14 +15,26 @@ const Review = sequelize.define(
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "User",
+        key: "user_id",
+      },
     },
     park_id: {
       type: DataTypes.STRING(50),
       allowNull: true,
+      references: {
+        model: "Park",
+        key: "park_id",
+      },
     },
     facility_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "Facility",
+        key: "facility_id",
+      },
     },
     rating: {
       type: DataTypes.DECIMAL(2, 1),
