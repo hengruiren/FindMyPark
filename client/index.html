@@ -20,11 +20,11 @@
                 <h1>FindMyPark</h1>
             </div>
             <div class="user-section" id="userSection">
-                <button id="settingsBtn" class="auth-btn settings-btn" style="display: none;">Settings</button>
                 <button id="loginBtn" class="auth-btn login-btn">Login</button>
                 <button id="registerBtn" class="auth-btn register-btn">Register</button>
                 <div id="userInfo" class="user-info" style="display: none;">
                     <span id="usernameDisplay"></span>
+                    <button id="settingsBtn" class="auth-btn settings-btn">Settings</button>
                     <button id="logoutBtn" class="auth-btn logout-btn">Logout</button>
                 </div>
             </div>
@@ -80,19 +80,21 @@
         <div class="modal-content large-modal">
             <span class="close">&times;</span>
             <h2>User Settings</h2>
+            <div class="user-info-display">
+                <div class="info-item">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value" id="settingsUsername"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" id="settingsEmail"></span>
+                </div>
+            </div>
             <form id="settingsForm">
                 <div class="settings-section">
                     <h3>🏃 Favorite Sports/Facilities</h3>
-                    <p class="section-description">Select your favorite sports and facilities to get personalized recommendations</p>
+                    <p class="section-description">Select your favorite sports and facilities. These will be automatically applied to filters when you login.</p>
                     <div class="facility-checkboxes" id="favoriteFacilities">
-                        <!-- Dynamic checkboxes will be inserted here -->
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3>📍 Preferred Boroughs</h3>
-                    <p class="section-description">Select your preferred boroughs to focus your search</p>
-                    <div class="borough-checkboxes" id="preferredBoroughs">
                         <!-- Dynamic checkboxes will be inserted here -->
                     </div>
                 </div>
@@ -102,18 +104,15 @@
                     <div class="form-group">
                         <label>
                             <input type="checkbox" id="showOnlyFavorites">
-                            Only show parks with my favorite facilities
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="prioritizePreferredBoroughs">
-                            Prioritize parks in my preferred boroughs
+                            Automatically filter by favorite facilities when I login
                         </label>
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Save Settings</button>
+                <div class="settings-actions">
+                    <button type="submit" class="submit-btn">Save Settings</button>
+                    <button type="button" id="deleteAccountBtn" class="delete-btn">Delete Account</button>
+                </div>
             </form>
             <div id="settingsError" class="error-message"></div>
             <div id="settingsSuccess" class="success-message"></div>
@@ -149,6 +148,16 @@
                 </div>
             </div>
 
+            <!-- Trail Filter -->
+            <div class="filter-section">
+                <h2>🛤️ Show Trails</h2>
+                <div class="filter-buttons" id="trailFilters">
+                    <button class="filter-btn active" data-trail="all">All Parks</button>
+                    <button class="filter-btn" data-trail="trails">Parks with Trails</button>
+                    <button class="filter-btn" data-trail="only-trails">Trails Only (No Facilities)</button>
+                </div>
+            </div>
+
             <!-- Borough Filter -->
             <div class="filter-section">
                 <h2>📍 Borough</h2>
@@ -156,6 +165,12 @@
                     <button class="filter-btn active" data-borough="all">All</button>
                     <!-- Dynamic buttons will be inserted here -->
                 </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel" id="infoPanel" style="display: none;">
+                <h2>📋 Park Information</h2>
+                <div id="parkInfo"></div>
             </div>
 
             <!-- Stats Section -->
@@ -176,12 +191,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Info Panel -->
-            <div class="info-panel" id="infoPanel" style="display: none;">
-                <h2>📋 Park Information</h2>
-                <div id="parkInfo"></div>
-            </div>
         </aside>
 
         <!-- Map Container (Right Side) -->
@@ -190,6 +199,7 @@
             <div class="map-controls">
                 <button id="resetViewBtn" class="control-btn">Reset View</button>
                 <button id="clearFiltersBtn" class="control-btn">Clear Filters</button>
+                <button id="applyPreferencesBtn" class="control-btn" style="display: none;">Apply My Preferences</button>
             </div>
         </div>
     </div>

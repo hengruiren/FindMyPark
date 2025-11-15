@@ -126,7 +126,7 @@ body {
 .user-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 #usernameDisplay {
@@ -249,6 +249,32 @@ body {
     box-shadow: var(--shadow);
 }
 
+.settings-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.delete-btn {
+    width: 100%;
+    padding: 12px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
 .error-message {
     margin-top: 15px;
     padding: 10px;
@@ -280,6 +306,36 @@ body {
 }
 
 /* Settings Modal Styles */
+.user-info-display {
+    background: var(--bg-color);
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.info-item:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95em;
+}
+
+.info-value {
+    color: var(--text-secondary);
+    font-size: 0.95em;
+}
+
 .settings-section {
     margin-bottom: 30px;
     padding-bottom: 25px;

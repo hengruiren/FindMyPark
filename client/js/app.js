@@ -6,11 +6,13 @@ let map;
 let parkMarkers = [];
 let allParks = [];
 let allFacilities = [];
+let allTrails = [];
 let currentUser = null;
 let currentFilters = {
     facilityType: 'all',
     borough: 'all',
-    searchTerm: ''
+    searchTerm: '',
+    showTrails: 'all'
 };
 
 // Initialize Map
@@ -84,6 +86,39 @@ function filterParks(parks) {
         });
     }
 
+    // Filter by trails
+    if (currentFilters.showTrails === 'trails') {
+        // Show parks that have trails (may also have facilities)
+        const parksWithTrails = new Set();
+        allTrails.forEach(t => {
+            const parkId = String(t.park_id || '').trim();
+            if (parkId) parksWithTrails.add(parkId);
+        });
+        
+        filtered = filtered.filter(p => {
+            const parkId = String(p.park_id || '').trim();
+            return parkId && parksWithTrails.has(parkId);
+        });
+    } else if (currentFilters.showTrails === 'only-trails') {
+        // Show parks that have trails but NO facilities
+        const parksWithTrails = new Set();
+        allTrails.forEach(t => {
+            const parkId = String(t.park_id || '').trim();
+            if (parkId) parksWithTrails.add(parkId);
+        });
+        
+        const parksWithFacilities = new Set();
+        allFacilities.forEach(f => {
+            const parkId = String(f.park_id || '').trim();
+            if (parkId) parksWithFacilities.add(parkId);
+        });
+        
+        filtered = filtered.filter(p => {
+            const parkId = String(p.park_id || '').trim();
+            return parkId && parksWithTrails.has(parkId) && !parksWithFacilities.has(parkId);
+        });
+    }
+
     // Filter by borough
     if (currentFilters.borough !== 'all') {
         filtered = filtered.filter(p => p.borough === currentFilters.borough);
@@ -124,6 +159,9 @@ async function loadInitialData() {
         if (!boroughsResponse.ok) throw new Error('Failed to load boroughs');
         const boroughs = await boroughsResponse.json();
         populateBoroughFilters(boroughs);
+        
+        // Setup trail filters
+        setupTrailFilters();
 
         // Load statistics
         await loadStatistics();
@@ -142,8 +180,17 @@ async function loadInitialData() {
         }).filter(id => id));
         console.log(`Basketball facilities: ${basketballFacilities.length}, Unique parks: ${basketballParks.size}`);
 
+        // Load trails - get ALL trails without limit
+        const trailsResponse = await fetch(`${API_BASE}/trails?limit=10000`);
+        if (!trailsResponse.ok) throw new Error('Failed to load trails');
+        allTrails = await trailsResponse.json();
+        console.log(`Loaded ${allTrails.length} trails`);
+
         // Create park-facility mapping
         createParkFacilityMapping();
+        
+        // Create park-trail mapping
+        createParkTrailMapping();
 
         // Initialize settings form
         await initializeSettingsForm();
@@ -197,6 +244,22 @@ function populateFacilityFilters(facilityTypes) {
             applyFilters();
         });
         container.appendChild(btn);
+    });
+}
+
+// Setup Trail Filters
+function setupTrailFilters() {
+    const container = document.getElementById('trailFilters');
+    
+    container.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active from all trail filter buttons
+            container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            // Add active to clicked
+            btn.classList.add('active');
+            currentFilters.showTrails = btn.dataset.trail;
+            applyFilters();
+        });
     });
 }
 
@@ -273,6 +336,40 @@ function getFacilitiesForPark(parkId) {
     return parkFacilityMap[normalizedParkId] || [];
 }
 
+// Create Park-Trail Mapping
+let parkTrailMap = {};
+
+function createParkTrailMapping() {
+    parkTrailMap = {};
+    let skippedCount = 0;
+    
+    allTrails.forEach(trail => {
+        // Normalize park_id (trim and ensure string)
+        const parkId = String(trail.park_id || '').trim();
+        if (!parkId || parkId === 'undefined' || parkId === 'null') {
+            skippedCount++;
+            return;
+        }
+        
+        if (!parkTrailMap[parkId]) {
+            parkTrailMap[parkId] = [];
+        }
+        parkTrailMap[parkId].push(trail);
+    });
+    
+    // Debug: log mapping statistics
+    const parkIdsWithTrails = Object.keys(parkTrailMap).length;
+    const totalMappedTrails = Object.values(parkTrailMap).reduce((sum, trails) => sum + trails.length, 0);
+    console.log(`Park-Trail mapping: ${parkIdsWithTrails} parks with trails, ${totalMappedTrails} total trails mapped, ${skippedCount} skipped`);
+}
+
+// Get trails for a park (normalized lookup)
+function getTrailsForPark(parkId) {
+    if (!parkId) return [];
+    const normalizedParkId = String(parkId).trim();
+    return parkTrailMap[normalizedParkId] || [];
+}
+
 // Display Parks on Map
 function displayParksOnMap(parks) {
     // Clear existing markers
@@ -291,11 +388,12 @@ function displayParksOnMap(parks) {
         const normalizedParkId = String(park.park_id || '').trim();
         if (!normalizedParkId) return;
         
-        // Get facilities for this park (with normalized lookup)
+        // Get facilities and trails for this park (with normalized lookup)
         const facilities = getFacilitiesForPark(normalizedParkId);
+        const trails = getTrailsForPark(normalizedParkId);
 
-        // Create custom icon with better styling
-        const icon = createCustomIcon(facilities.length > 0, facilities.length);
+        // Create custom icon with better styling (include trails info)
+        const icon = createCustomIcon(facilities.length > 0, facilities.length, false, trails.length > 0);
 
         // Create marker
         const marker = L.marker([parseFloat(park.latitude), parseFloat(park.longitude)], {
@@ -303,20 +401,54 @@ function displayParksOnMap(parks) {
         });
 
         // Create popup content
-        const popupContent = createPopupContent(park, facilities);
+        const popupContent = createPopupContent(park, facilities, trails);
 
-        marker.bindPopup(popupContent, {
+        // Bind popup with longer delay and keep open on hover
+        const popup = marker.bindPopup(popupContent, {
             maxWidth: 300,
-            className: 'custom-popup'
+            className: 'custom-popup',
+            closeOnClick: false,
+            autoClose: false,
+            closeOnEscapeKey: true
+        });
+        
+        // Show popup on mouseover, hide on mouseout with delay
+        let popupTimeout;
+        marker.on('mouseover', function() {
+            clearTimeout(popupTimeout);
+            marker.openPopup();
+        });
+        
+        marker.on('mouseout', function() {
+            // Delay closing popup
+            popupTimeout = setTimeout(() => {
+                marker.closePopup();
+            }, 500); // 500ms delay before closing
+        });
+        
+        // Also handle popup mouse events to keep it open when hovering over popup
+        marker.on('popupopen', function() {
+            const popupElement = marker.getPopup().getElement();
+            if (popupElement) {
+                popupElement.addEventListener('mouseenter', () => {
+                    clearTimeout(popupTimeout);
+                });
+                popupElement.addEventListener('mouseleave', () => {
+                    popupTimeout = setTimeout(() => {
+                        marker.closePopup();
+                    }, 500);
+                });
+            }
         });
         
         // Add click event
         marker.on('click', async () => {
-            // Get fresh facilities for this park (will fetch from API if not in mapping)
+            // Get fresh facilities and trails for this park
             const parkFacilities = getFacilitiesForPark(park.park_id);
-            await showParkInfo(park, parkFacilities);
+            const parkTrails = getTrailsForPark(park.park_id);
+            await showParkInfo(park, parkFacilities, parkTrails);
             // Highlight marker
-            marker.setIcon(createCustomIcon(true, parkFacilities.length, true));
+            marker.setIcon(createCustomIcon(parkFacilities.length > 0, parkFacilities.length, true, parkTrails.length > 0));
             setTimeout(() => {
                 marker.setIcon(icon);
             }, 1000);
@@ -331,18 +463,30 @@ function displayParksOnMap(parks) {
 }
 
 // Create Custom Icon with better design
-function createCustomIcon(hasFacilities, facilityCount = 0, highlighted = false) {
+function createCustomIcon(hasFacilities, facilityCount = 0, highlighted = false, hasTrails = false) {
     let color, size, borderWidth;
     
     if (highlighted) {
         color = '#e74c3c';
         size = 20;
         borderWidth = 3;
+    } else if (hasFacilities && hasTrails) {
+        // Both facilities and trails - use purple/indigo color
+        color = '#9b59b6';
+        size = facilityCount > 5 ? 18 : 16;
+        borderWidth = 3;
     } else if (hasFacilities) {
+        // Only facilities - blue
         color = '#3498db';
         size = facilityCount > 5 ? 18 : 15;
         borderWidth = 3;
+    } else if (hasTrails) {
+        // Only trails - green
+        color = '#27ae60';
+        size = 15;
+        borderWidth = 3;
     } else {
+        // Neither - gray
         color = '#95a5a6';
         size = 10;
         borderWidth = 2;
@@ -366,7 +510,7 @@ function createCustomIcon(hasFacilities, facilityCount = 0, highlighted = false)
 }
 
 // Create Popup Content
-function createPopupContent(park, facilities) {
+function createPopupContent(park, facilities, trails = null) {
     let html = '<div class="popup-content">';
     html += `<div class="popup-title">${park.park_name || 'Unknown Park'}</div>`;
     html += `<div class="popup-info"><strong>Borough:</strong> ${park.borough || 'N/A'}</div>`;
@@ -379,7 +523,16 @@ function createPopupContent(park, facilities) {
     if (park.is_waterfront) {
         html += `<div class="popup-info"><strong>Waterfront:</strong> Yes</div>`;
     }
-
+    
+    // Get trails if not provided
+    if (!trails) {
+        trails = getTrailsForPark(park.park_id);
+    }
+    
+    if (trails && trails.length > 0) {
+        html += `<div class="popup-info" style="color: #27ae60; font-weight: 600;">🛤️ Has ${trails.length} Trail${trails.length > 1 ? 's' : ''}</div>`;
+    }
+    
     if (facilities.length > 0) {
         html += '<div class="popup-facilities"><strong>Facilities:</strong><div class="facility-list">';
         const facilityTypes = {};
@@ -402,7 +555,7 @@ function createPopupContent(park, facilities) {
 }
 
 // Show Park Info in Sidebar
-async function showParkInfo(park, facilities = null) {
+async function showParkInfo(park, facilities = null, trails = null) {
     const infoPanel = document.getElementById('infoPanel');
     const parkInfo = document.getElementById('parkInfo');
     
@@ -423,6 +576,26 @@ async function showParkInfo(park, facilities = null) {
             } catch (error) {
                 console.error('Error fetching facilities:', error);
                 facilities = [];
+            }
+        }
+    }
+    
+    // If trails not provided, try to get them
+    if (!trails) {
+        trails = getTrailsForPark(park.park_id);
+        
+        // If still no trails, try to fetch from API
+        if (trails.length === 0) {
+            try {
+                const response = await fetch(`${API_BASE}/trails?park_id=${encodeURIComponent(park.park_id)}&limit=1000`);
+                if (response.ok) {
+                    const fetchedTrails = await response.json();
+                    trails = fetchedTrails || [];
+                    console.log(`Fetched ${trails.length} trails for park ${park.park_id} from API`);
+                }
+            } catch (error) {
+                console.error('Error fetching trails:', error);
+                trails = [];
             }
         }
     }
@@ -500,6 +673,53 @@ async function showParkInfo(park, facilities = null) {
         html += '</div>';
     } else {
         html += '<div class="no-facilities" style="margin-top: 15px; padding: 10px; background: var(--bg-color); border-radius: 8px; color: var(--text-secondary); font-style: italic;">No facilities available</div>';
+    }
+
+    // Add Trails Section
+    if (trails && trails.length > 0) {
+        html += '<div class="trails-section" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border-color);">';
+        html += '<h4 style="margin-bottom: 15px; color: #27ae60; font-size: 1.1em;">🛤️ Trails (' + trails.length + ')</h4>';
+        
+        trails.forEach((trail, index) => {
+            html += '<div class="trail-detail" style="margin-bottom: 15px; padding: 12px; background: #f0f9f4; border-radius: 8px; border-left: 4px solid #27ae60;">';
+            
+            if (trail.trail_name) {
+                html += `<div style="font-weight: 600; color: var(--primary-color); margin-bottom: 8px; font-size: 1em;">${trail.trail_name}</div>`;
+            } else {
+                html += `<div style="font-weight: 600; color: var(--primary-color); margin-bottom: 8px; font-size: 1em;">Trail ${index + 1}</div>`;
+            }
+            
+            html += '<div style="display: flex; flex-direction: column; gap: 5px; font-size: 0.9em;">';
+            
+            if (trail.difficulty) {
+                html += `<div><strong>Difficulty:</strong> ${trail.difficulty}</div>`;
+            }
+            
+            if (trail.surface) {
+                html += `<div><strong>Surface:</strong> ${trail.surface}</div>`;
+            }
+            
+            if (trail.width_ft) {
+                html += `<div><strong>Width:</strong> ${trail.width_ft} ft</div>`;
+            }
+            
+            if (trail.has_trail_markers) {
+                html += '<div style="color: var(--success-color); font-weight: 500;">📍 Has Trail Markers</div>';
+            }
+            
+            if (trail.avg_trail_rating && parseFloat(trail.avg_trail_rating) > 0) {
+                html += `<div style="margin-top: 5px; color: var(--warning-color);"><strong>Rating:</strong> ${parseFloat(trail.avg_trail_rating).toFixed(2)}/5.0`;
+                if (trail.total_trail_reviews > 0) {
+                    html += ` (${trail.total_trail_reviews} review${trail.total_trail_reviews > 1 ? 's' : ''})`;
+                }
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            html += '</div>';
+        });
+        
+        html += '</div>';
     }
 
     html += '</div>';
@@ -911,6 +1131,9 @@ function setupUserSettings() {
 
     settingsBtn.addEventListener('click', async () => {
         if (!currentUser) return;
+        // Display user info
+        document.getElementById('settingsUsername').textContent = currentUser.username || 'N/A';
+        document.getElementById('settingsEmail').textContent = currentUser.email || 'N/A';
         await loadUserPreferences();
         settingsModal.classList.add('show');
     });
@@ -927,16 +1150,11 @@ function setupUserSettings() {
 
         const favoriteFacilities = Array.from(document.querySelectorAll('#favoriteFacilities input[type="checkbox"]:checked'))
             .map(cb => cb.value);
-        const preferredBoroughs = Array.from(document.querySelectorAll('#preferredBoroughs input[type="checkbox"]:checked'))
-            .map(cb => cb.value);
         const showOnlyFavorites = document.getElementById('showOnlyFavorites').checked;
-        const prioritizePreferredBoroughs = document.getElementById('prioritizePreferredBoroughs').checked;
 
         const preferences = {
             favoriteFacilities,
-            preferredBoroughs,
-            showOnlyFavorites,
-            prioritizePreferredBoroughs
+            showOnlyFavorites
         };
 
         const errorDiv = document.getElementById('settingsError');
@@ -964,6 +1182,9 @@ function setupUserSettings() {
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 }
 
+                // Update UI to show apply preferences button
+                updateUserUI();
+
                 // Apply preferences
                 applyUserPreferences();
 
@@ -978,6 +1199,45 @@ function setupUserSettings() {
             }
         } catch (error) {
             successDiv.classList.remove('show');
+            errorDiv.textContent = 'Failed to connect to server';
+            errorDiv.classList.add('show');
+        }
+    });
+
+    // Delete Account Button
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    deleteAccountBtn.addEventListener('click', async () => {
+        if (!currentUser) return;
+        
+        const confirmDelete = confirm(`Are you sure you want to delete your account "${currentUser.username}"? This action cannot be undone.`);
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/users/${currentUser.username}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                // Logout user
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                updateUserUI();
+                
+                // Close settings modal
+                settingsModal.classList.remove('show');
+                
+                alert('Account deleted successfully.');
+            } else {
+                const data = await response.json();
+                const errorDiv = document.getElementById('settingsError');
+                errorDiv.textContent = data.error || 'Failed to delete account';
+                errorDiv.classList.add('show');
+            }
+        } catch (error) {
+            const errorDiv = document.getElementById('settingsError');
             errorDiv.textContent = 'Failed to connect to server';
             errorDiv.classList.add('show');
         }
@@ -1016,16 +1276,8 @@ async function loadUserPreferences() {
                 updateCheckboxStyle(cb);
             });
 
-            // Preferred Boroughs
-            const boroughCheckboxes = document.querySelectorAll('#preferredBoroughs input[type="checkbox"]');
-            boroughCheckboxes.forEach(cb => {
-                cb.checked = preferences.preferredBoroughs?.includes(cb.value) || false;
-                updateCheckboxStyle(cb);
-            });
-
             // Display Preferences
             document.getElementById('showOnlyFavorites').checked = preferences.showOnlyFavorites || false;
-            document.getElementById('prioritizePreferredBoroughs').checked = preferences.prioritizePreferredBoroughs || false;
         }
     } catch (error) {
         console.error('Error loading preferences:', error);
@@ -1044,20 +1296,16 @@ function updateCheckboxStyle(checkbox) {
 
 // Initialize Settings Form
 async function initializeSettingsForm() {
-    // Wait for facilities and boroughs to load
+    // Wait for facilities to load
     if (allFacilities.length === 0 || !map) {
         setTimeout(initializeSettingsForm, 500);
         return;
     }
 
     const favoriteFacilities = document.getElementById('favoriteFacilities');
-    const preferredBoroughs = document.getElementById('preferredBoroughs');
 
     // Get unique facility types
     const facilityTypes = [...new Set(allFacilities.map(f => f.facility_type))].sort();
-    
-    // Get boroughs
-    const boroughs = ['Bronx', 'Brooklyn', 'Manhattan', 'Queens', 'Staten Island'];
 
     // Populate Facility Checkboxes
     favoriteFacilities.innerHTML = facilityTypes.map(type => `
@@ -1067,44 +1315,45 @@ async function initializeSettingsForm() {
             <label for="facility-${type}">${type}</label>
         </div>
     `).join('');
-
-    // Populate Borough Checkboxes
-    preferredBoroughs.innerHTML = boroughs.map(borough => `
-        <div class="settings-checkbox">
-            <input type="checkbox" id="borough-${borough}" value="${borough}" 
-                   onchange="updateCheckboxStyle(this)">
-            <label for="borough-${borough}">${borough}</label>
-        </div>
-    `).join('');
 }
 
 // Apply User Preferences
-function applyUserPreferences() {
-    if (!currentUser || !currentUser.preferences) return;
+function applyUserPreferences(forceApply = false) {
+    if (!currentUser || !currentUser.preferences) {
+        // If no preferences, try to load them
+        if (currentUser) {
+            loadUserPreferences().then(() => {
+                if (currentUser && currentUser.preferences) {
+                    applyUserPreferences(forceApply);
+                }
+            });
+        }
+        return;
+    }
 
     const prefs = currentUser.preferences;
 
     // Apply favorite facilities filter
-    if (prefs.favoriteFacilities && prefs.favoriteFacilities.length > 0 && prefs.showOnlyFavorites) {
-        // Find and activate the first favorite facility filter button
-        const facilityButtons = document.querySelectorAll('#facilityFilters .filter-btn');
-        facilityButtons.forEach(btn => {
-            if (prefs.favoriteFacilities.includes(btn.dataset.type)) {
-                btn.click();
-                return;
-            }
-        });
-    }
-
-    // Apply preferred boroughs filter
-    if (prefs.preferredBoroughs && prefs.preferredBoroughs.length > 0 && prefs.prioritizePreferredBoroughs) {
-        const boroughButtons = document.querySelectorAll('#boroughFilters .filter-btn');
-        boroughButtons.forEach(btn => {
-            if (prefs.preferredBoroughs.includes(btn.dataset.borough)) {
-                btn.click();
-                return;
-            }
-        });
+    if (prefs.favoriteFacilities && prefs.favoriteFacilities.length > 0) {
+        // Only auto-apply on login if showOnlyFavorites is true, or force apply if button clicked
+        if (prefs.showOnlyFavorites || forceApply) {
+            // Find and activate the first favorite facility filter button
+            const facilityButtons = document.querySelectorAll('#facilityFilters .filter-btn');
+            let found = false;
+            facilityButtons.forEach(btn => {
+                if (!found && prefs.favoriteFacilities.includes(btn.dataset.type)) {
+                    // Remove active from all buttons first
+                    facilityButtons.forEach(b => b.classList.remove('active'));
+                    // Add active to the matching button
+                    btn.classList.add('active');
+                    // Update filter
+                    currentFilters.facilityType = btn.dataset.type;
+                    // Apply filters
+                    applyFilters();
+                    found = true;
+                }
+            });
+        }
     }
 }
 
@@ -1117,12 +1366,20 @@ function updateUserUI() {
     const userInfo = document.getElementById('userInfo');
     const usernameDisplay = document.getElementById('usernameDisplay');
 
+    const applyPreferencesBtn = document.getElementById('applyPreferencesBtn');
+    
     if (currentUser) {
         loginBtn.style.display = 'none';
         registerBtn.style.display = 'none';
-        settingsBtn.style.display = 'block';
         userInfo.style.display = 'flex';
         usernameDisplay.textContent = currentUser.username;
+        
+        // Show apply preferences button if user has preferences
+        if (currentUser.preferences && currentUser.preferences.favoriteFacilities && currentUser.preferences.favoriteFacilities.length > 0) {
+            applyPreferencesBtn.style.display = 'block';
+        } else {
+            applyPreferencesBtn.style.display = 'none';
+        }
         
         // Load and apply user preferences
         if (currentUser.preferences) {
@@ -1132,14 +1389,36 @@ function updateUserUI() {
             loadUserPreferences().then(() => {
                 if (currentUser && currentUser.preferences) {
                     applyUserPreferences();
+                    // Show button if preferences loaded
+                    if (currentUser.preferences.favoriteFacilities && currentUser.preferences.favoriteFacilities.length > 0) {
+                        applyPreferencesBtn.style.display = 'block';
+                    }
                 }
             });
         }
     } else {
         loginBtn.style.display = 'block';
         registerBtn.style.display = 'block';
-        settingsBtn.style.display = 'none';
         userInfo.style.display = 'none';
+        applyPreferencesBtn.style.display = 'none';
+        // Reset filters when logging out
+        currentFilters.facilityType = 'all';
+        currentFilters.borough = 'all';
+        // Reset filter buttons
+        document.querySelectorAll('#facilityFilters .filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.type === 'all') btn.classList.add('active');
+        });
+        document.querySelectorAll('#boroughFilters .filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.borough === 'all') btn.classList.add('active');
+        });
+        document.querySelectorAll('#trailFilters .filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.trail === 'all') btn.classList.add('active');
+        });
+        currentFilters.showTrails = 'all';
+        applyFilters();
     }
 }
 
@@ -1159,6 +1438,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup buttons
     document.getElementById('resetViewBtn').addEventListener('click', resetView);
     document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
+    
+    // Apply Preferences Button
+    const applyPreferencesBtn = document.getElementById('applyPreferencesBtn');
+    applyPreferencesBtn.addEventListener('click', () => {
+        if (currentUser) {
+            applyUserPreferences(true); // Force apply
+        }
+    });
 
     // Load data
     loadInitialData();
