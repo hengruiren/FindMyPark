@@ -1,0 +1,196 @@
+{
+  "baseUrl": "http://localhost:3000/api/parks",
+  "testCases": {
+    "1_GET_BOROUGHS": {
+      "1.1_GetAllBoroughs": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/boroughs",
+        "headers": {},
+        "body": null,
+        "description": "Get all distinct boroughs"
+      }
+    },
+    "2_GET_STATS": {
+      "2.1_GetStatistics": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/stats",
+        "headers": {},
+        "body": null,
+        "description": "Get park statistics (total parks, boroughs, avg rating, waterfront parks)"
+      }
+    },
+    "3_SEARCH_PARKS": {
+      "3.1_SearchByName": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks?name=Central Park",
+        "headers": {},
+        "body": null,
+        "description": "Search parks by name (exact match)"
+      },
+      "3.2_SearchByBorough": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks?borough=Manhattan",
+        "headers": {},
+        "body": null,
+        "description": "Search parks by borough"
+      },
+      "3.3_SearchByNameAndBorough": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks?name=Park&borough=Brooklyn",
+        "headers": {},
+        "body": null,
+        "description": "Search parks by both name and borough"
+      },
+      "3.4_SearchWithLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks?name=Park&limit=10",
+        "headers": {},
+        "body": null,
+        "description": "Search parks with custom limit"
+      },
+      "3.5_GetAllParks": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks",
+        "headers": {},
+        "body": null,
+        "description": "Get all parks (default limit 20)"
+      },
+      "3.6_GetAllParksWithLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks?limit=50",
+        "headers": {},
+        "body": null,
+        "description": "Get all parks with custom limit"
+      }
+    },
+    "4_GET_PARKS_BY_FACILITY_TYPE": {
+      "4.1_GetParksWithBasketball": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/by-facility?facilityType=Basketball",
+        "headers": {},
+        "body": null,
+        "description": "Get parks with basketball courts"
+      },
+      "4.2_GetParksWithTennis": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/by-facility?facilityType=Tennis",
+        "headers": {},
+        "body": null,
+        "description": "Get parks with tennis courts"
+      },
+      "4.3_GetParksWithSoccer": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/by-facility?facilityType=Soccer",
+        "headers": {},
+        "body": null,
+        "description": "Get parks with soccer fields"
+      },
+      "4.4_GetParksWithBaseball": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/by-facility?facilityType=Baseball",
+        "headers": {},
+        "body": null,
+        "description": "Get parks with baseball fields"
+      },
+      "4.5_GetParksWithFacilityTypeAndLimit": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/by-facility?facilityType=Basketball&limit=20",
+        "headers": {},
+        "body": null,
+        "description": "Get parks with facility type and custom limit"
+      },
+      "4.6_MissingFacilityType": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/by-facility",
+        "headers": {},
+        "body": null,
+        "description": "Missing facilityType parameter (should return 400 error)"
+      },
+      "4.7_InvalidFacilityType": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/by-facility?facilityType=InvalidType",
+        "headers": {},
+        "body": null,
+        "description": "Invalid facility type (should return empty array)"
+      }
+    },
+    "5_GET_PARK_BY_ID": {
+      "5.1_GetParkBasicInfo": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/12345",
+        "headers": {},
+        "body": null,
+        "description": "Get park basic information by park_id (replace 12345 with actual park_id)"
+      },
+      "5.2_GetParkWithDetails": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/12345?details=true",
+        "headers": {},
+        "body": null,
+        "description": "Get park with facilities, trails, and reviews (replace 12345 with actual park_id)"
+      },
+      "5.3_ParkNotFound": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/parks/INVALID_PARK_ID",
+        "headers": {},
+        "body": null,
+        "description": "Park not found (should return 404 error)"
+      }
+    }
+  },
+  "facilityTypes": [
+    "Basketball",
+    "Tennis",
+    "Soccer",
+    "Baseball",
+    "Softball",
+    "Football",
+    "Volleyball",
+    "Track",
+    "Handball",
+    "Pickleball",
+    "Hockey",
+    "Cricket",
+    "Rugby",
+    "Bocce",
+    "Lacrosse",
+    "Frisbee",
+    "Kickball",
+    "Netball"
+  ],
+  "boroughs": ["Manhattan", "Brooklyn", "Queens", "The Bronx", "Staten Island"],
+  "quickCopy": {
+    "getBoroughs": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks/boroughs"
+    },
+    "getStats": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks/stats"
+    },
+    "searchByName": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks?name=Central Park"
+    },
+    "searchByBorough": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks?borough=Manhattan"
+    },
+    "searchByNameAndBorough": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks?name=Park&borough=Brooklyn"
+    },
+    "getParksByFacility": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks/by-facility?facilityType=Basketball"
+    },
+    "getParkById": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks/12345"
+    },
+    "getParkWithDetails": {
+      "method": "GET",
+      "url": "http://localhost:3000/api/parks/12345?details=true"
+    }
+  }
+}

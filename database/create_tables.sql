@@ -9,6 +9,7 @@ CREATE TABLE User (
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    preferences TEXT COMMENT 'JSON string for user preferences (favorite facilities, display settings)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
