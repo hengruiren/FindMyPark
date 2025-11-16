@@ -8,3 +8,4 @@ ADD COLUMN preferences TEXT COMMENT 'JSON string for user preferences (favorite 
 AFTER password_hash;
 
 
+
