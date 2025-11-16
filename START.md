@@ -52,30 +52,7 @@ sudo service mysql start
 - Find "MySQL" service and start it
 - Or use MySQL Command Line Client
 
-### 2.2 Create Database and User
-
-Open MySQL command line:
-```bash
-mysql -u root -p
-```
-
-Enter your MySQL root password when prompted.
-
-Then run the following SQL commands:
-```sql
--- Create database
-CREATE DATABASE IF NOT EXISTS findmypark_nyc;
-USE findmypark_nyc;
-
--- Create user (optional, or use root)
-CREATE USER IF NOT EXISTS 'findmypark_user'@'localhost' IDENTIFIED BY 'your_password_here';
-GRANT ALL PRIVILEGES ON findmypark_nyc.* TO 'findmypark_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-**Note:** If you create a new user, you'll need to update the database configuration (see Step 3.2).
-
-### 2.3 Create Tables
+### 2.2 Create Tables
 
 Run the SQL script to create all tables:
 ```bash
@@ -87,9 +64,7 @@ Or if using the new user:
 mysql -u findmypark_user -p findmypark_nyc < database/create_tables.sql
 ```
 
-### 2.4 Import Data (Optional)
-
-If you have CSV data files, you can import them using the Python script:
+### 2.3 Import Data
 ```bash
 cd database
 python3 data_importer.py
