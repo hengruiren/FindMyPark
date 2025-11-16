@@ -7,3 +7,4 @@ ALTER TABLE User
 ADD COLUMN preferences TEXT COMMENT 'JSON string for user preferences (favorite facilities, display settings)' 
 AFTER password_hash;
 
+

@@ -972,3 +972,147 @@ body {
 * {
     transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* Star Rating Styles */
+.star-rating {
+    display: inline-flex;
+    gap: 2px;
+    align-items: center;
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.star-rating.interactive {
+    cursor: pointer;
+}
+
+.star {
+    color: #ddd;
+    font-size: 1.2em;
+    transition: color 0.2s ease, transform 0.1s ease;
+    user-select: none;
+}
+
+.star-filled {
+    color: #f39c12;
+}
+
+.star-half {
+    color: #f39c12;
+    position: relative;
+}
+
+.star-half::after {
+    content: '★';
+    position: absolute;
+    left: 0;
+    width: 50%;
+    overflow: hidden;
+    color: #ddd;
+}
+
+.star-empty {
+    color: #ddd;
+}
+
+.star-rating.interactive .star:hover,
+.star-rating.interactive .star.star-hover {
+    color: #f39c12;
+    transform: scale(1.1);
+}
+
+.star-rating.interactive .star.star-selected {
+    color: #f39c12;
+}
+
+/* Review Styles */
+.review-item {
+    transition: box-shadow 0.2s ease;
+}
+
+.review-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.review-comment {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Facility Collapsible Styles */
+.facility-group details {
+    transition: all 0.3s ease;
+}
+
+.facility-group details[open] summary span:first-child {
+    transform: rotate(90deg);
+    display: inline-block;
+}
+
+.facility-group summary {
+    transition: color 0.2s ease;
+}
+
+.facility-group summary:hover {
+    color: var(--primary-color);
+}
+
+.facility-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.facility-group summary::marker {
+    display: none;
+}
+
+/* Trail Collapsible Styles */
+.trail-group details {
+    transition: all 0.3s ease;
+}
+
+.trail-group details[open] summary span:first-child {
+    transform: rotate(90deg);
+    display: inline-block;
+}
+
+.trail-group summary {
+    transition: color 0.2s ease;
+}
+
+.trail-group summary:hover {
+    color: var(--primary-color);
+}
+
+.trail-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.trail-group summary::marker {
+    display: none;
+}
+
+/* Review Collapsible Styles */
+.review-group details {
+    transition: all 0.3s ease;
+}
+
+.review-group details[open] summary span:first-child {
+    transform: rotate(90deg);
+    display: inline-block;
+}
+
+.review-group summary {
+    transition: color 0.2s ease;
+}
+
+.review-group summary:hover {
+    color: var(--primary-color);
+}
+
+.review-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.review-group summary::marker {
+    display: none;
+}
