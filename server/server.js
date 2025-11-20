@@ -14,6 +14,8 @@ const facilitiesRoutes = require("./routes/facilitiesRoutes");
 const trailsRoutes = require("./routes/trailsRoutes");
 const reviewsRoutes = require("./routes/reviewsRoutes");
 const usersRoutes = require("./routes/usersRoutes");
+const recommendationsRoutes = require("./routes/recommendationsRoutes");
+const storedProcedureRoutes = require("./routes/storedProcedureRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +37,8 @@ app.use("/api/facilities", facilitiesRoutes);
 app.use("/api/trails", trailsRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/recommendations", recommendationsRoutes);
+app.use("/api/stored-procedures", storedProcedureRoutes);
 
 // Serve static files from client directory
 app.use(express.static(path.join(__dirname, "../client")));

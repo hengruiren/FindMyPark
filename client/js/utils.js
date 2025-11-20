@@ -66,9 +66,33 @@ async function showParkInfo(park, facilities = null, trails = null) {
         }
     }
 
+    // Check if park is favorite (with fallback if function not available yet)
+    const isParkFavorite = currentUser && typeof isFavorite === 'function' ? isFavorite(park.park_id) : false;
+    const favoriteBtnClass = isParkFavorite ? 'favorite-btn active' : 'favorite-btn';
+    const favoriteBtnText = isParkFavorite ? `
+        <svg class="tag-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        <span>Saved</span>
+    ` : `
+        <svg class="tag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        <span>Save</span>
+    `;
+    
     let html = `
         <div class="park-info-item">
-            <h3>${park.park_name || 'Unknown Park'}</h3>
+            <div class="park-header-with-favorite">
+                <h3>${park.park_name || 'Unknown Park'}</h3>
+                ${currentUser ? `
+                    <button class="${favoriteBtnClass}" data-park-id="${park.park_id}" onclick="toggleFavorite('${park.park_id}')">
+                        ${favoriteBtnText}
+                    </button>
+                ` : ''}
+            </div>
             <p><strong>ID:</strong> ${park.park_id}</p>
             <p><strong>Borough:</strong> ${park.borough || 'N/A'}</p>
             <p><strong>Zip Code:</strong> ${park.zipcode || 'N/A'}</p>
@@ -211,6 +235,13 @@ async function showParkInfo(park, facilities = null, trails = null) {
     html += '</div>';
     parkInfo.innerHTML = html;
     infoPanel.style.display = 'block';
+    
+    // Update favorite button state after a short delay to ensure functions are loaded
+    setTimeout(() => {
+        if (typeof updateFavoriteButtons === 'function') {
+            updateFavoriteButtons();
+        }
+    }, 50);
     
     // Setup review form after rendering
     setTimeout(() => {

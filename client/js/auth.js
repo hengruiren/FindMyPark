@@ -5,6 +5,10 @@ function setupUserAuth() {
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
         updateUserUI();
+        // Load favorites from server
+        if (typeof loadUserFavorites === 'function') {
+            loadUserFavorites();
+        }
     }
 
     // Login modal
@@ -34,6 +38,10 @@ function setupUserAuth() {
             currentUser = data.user;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             updateUserUI();
+            // Load favorites after login
+            if (typeof loadUserFavorites === 'function') {
+                await loadUserFavorites();
+            }
             loginModal.classList.remove('show');
             loginForm.reset();
             errorDiv.classList.remove('show');
@@ -74,6 +82,10 @@ function setupUserAuth() {
             currentUser = loginData.user;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             updateUserUI();
+            // Load favorites after registration/login
+            if (typeof loadUserFavorites === 'function') {
+                await loadUserFavorites();
+            }
             registerModal.classList.remove('show');
             registerForm.reset();
             errorDiv.classList.remove('show');
@@ -106,6 +118,10 @@ function setupUserAuth() {
 }
 
 function updateUserUI() {
+    // Update recommendations UI when user state changes
+    if (typeof updateRecommendationsUI === 'function') {
+        updateRecommendationsUI();
+    }
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
     const userInfo = document.getElementById('userInfo');
@@ -142,6 +158,12 @@ function updateUserUI() {
         userInfo.style.display = 'none';
         applyPreferencesBtn.style.display = 'none';
         
+        // Clear favorites when logging out
+        userFavorites = [];
+        if (typeof updateFavoritesUI === 'function') {
+            updateFavoritesUI();
+        }
+        
         // Reset filters when logging out
         currentFilters.facilityType = 'all';
         currentFilters.borough = 'all';
@@ -161,6 +183,18 @@ function updateUserUI() {
         });
         applyFilters();
     }
+    
+    // Update recommendations UI when user state changes
+    if (typeof updateRecommendationsUI === 'function') {
+        updateRecommendationsUI();
+    }
+    
+    // Update floating buttons when user state changes
+    if (typeof updateFloatingButtons === 'function') {
+        updateFloatingButtons();
+    }
 }
+
+
 
 

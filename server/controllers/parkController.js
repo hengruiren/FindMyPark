@@ -25,6 +25,25 @@ class ParkController {
     }
   }
 
+  // Get all park types
+  static async getParkTypes(req, res) {
+    try {
+      const parkTypes = await Park.findAll({
+        attributes: [
+          [sequelize.fn("DISTINCT", sequelize.col("park_type")), "park_type"],
+        ],
+        where: {
+          park_type: { [Op.ne]: null },
+        },
+        order: [["park_type", "ASC"]],
+        raw: true,
+      });
+      res.json(parkTypes);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   // Get statistics
   static async getStats(req, res) {
     try {

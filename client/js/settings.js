@@ -10,6 +10,10 @@ function setupUserSettings() {
         document.getElementById('settingsUsername').textContent = currentUser.username || 'N/A';
         document.getElementById('settingsEmail').textContent = currentUser.email || 'N/A';
         await loadUserPreferences();
+        // Load favorites when opening settings
+        if (typeof displayFavoritesList === 'function') {
+            await displayFavoritesList();
+        }
         settingsModal.classList.add('show');
     });
 
@@ -26,10 +30,28 @@ function setupUserSettings() {
         const favoriteFacilities = Array.from(document.querySelectorAll('#favoriteFacilities input[type="checkbox"]:checked'))
             .map(cb => cb.value);
         const showOnlyFavorites = document.getElementById('showOnlyFavorites').checked;
+        
+        const preferredBoroughs = Array.from(document.querySelectorAll('#preferredBoroughs input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
+        
+        const preferredParkTypes = Array.from(document.querySelectorAll('#preferredParkTypes input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
+        
+        const preferredWaterfront = document.querySelector('input[name="preferredWaterfront"]:checked')?.value;
+        const waterfrontValue = preferredWaterfront === 'yes' ? true : preferredWaterfront === 'no' ? false : null;
+        
+        const minRating = parseFloat(document.getElementById('minRating').value) || 0;
+        
+        const preferredSize = document.querySelector('input[name="preferredSize"]:checked')?.value || null;
 
         const preferences = {
             favoriteFacilities,
-            showOnlyFavorites
+            showOnlyFavorites,
+            preferredBoroughs,
+            preferredParkTypes,
+            preferredWaterfront: waterfrontValue,
+            minRating,
+            preferredSize
         };
 
         const errorDiv = document.getElementById('settingsError');
@@ -109,6 +131,42 @@ async function loadUserPreferences() {
             });
 
             document.getElementById('showOnlyFavorites').checked = preferences.showOnlyFavorites || false;
+            
+            // Load borough preferences
+            if (preferences.preferredBoroughs) {
+                const boroughCheckboxes = document.querySelectorAll('#preferredBoroughs input[type="checkbox"]');
+                boroughCheckboxes.forEach(cb => {
+                    cb.checked = preferences.preferredBoroughs.includes(cb.value) || false;
+                    updateCheckboxStyle(cb);
+                });
+            }
+            
+            // Load park type preferences
+            if (preferences.preferredParkTypes) {
+                const parkTypeCheckboxes = document.querySelectorAll('#preferredParkTypes input[type="checkbox"]');
+                parkTypeCheckboxes.forEach(cb => {
+                    cb.checked = preferences.preferredParkTypes.includes(cb.value) || false;
+                    updateCheckboxStyle(cb);
+                });
+            }
+            
+            // Load waterfront preference
+            if (preferences.preferredWaterfront !== null && preferences.preferredWaterfront !== undefined) {
+                const waterfrontValue = preferences.preferredWaterfront ? 'yes' : 'no';
+                const waterfrontRadio = document.querySelector(`input[name="preferredWaterfront"][value="${waterfrontValue}"]`);
+                if (waterfrontRadio) waterfrontRadio.checked = true;
+            }
+            
+            // Load min rating
+            if (preferences.minRating !== undefined) {
+                document.getElementById('minRating').value = preferences.minRating;
+            }
+            
+            // Load size preference
+            if (preferences.preferredSize) {
+                const sizeRadio = document.querySelector(`input[name="preferredSize"][value="${preferences.preferredSize}"]`);
+                if (sizeRadio) sizeRadio.checked = true;
+            }
         }
     } catch (error) {
         console.error('Error loading preferences:', error);
@@ -140,6 +198,40 @@ async function initializeSettingsForm() {
             <label for="facility-${type}">${type}</label>
         </div>
     `).join('');
+    
+    // Initialize borough preferences
+    try {
+        const boroughs = await fetchBoroughs();
+        const boroughList = document.getElementById('preferredBoroughs');
+        if (boroughList) {
+            boroughList.innerHTML = boroughs.map(b => `
+                <div class="settings-checkbox">
+                    <input type="checkbox" id="borough-${b.borough}" value="${b.borough}" 
+                           onchange="updateCheckboxStyle(this)">
+                    <label for="borough-${b.borough}">${b.borough}</label>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading boroughs for settings:', error);
+    }
+    
+    // Initialize park type preferences
+    try {
+        const parkTypes = await fetchParkTypes();
+        const parkTypeList = document.getElementById('preferredParkTypes');
+        if (parkTypeList) {
+            parkTypeList.innerHTML = parkTypes.filter(pt => pt.park_type).map(pt => `
+                <div class="settings-checkbox">
+                    <input type="checkbox" id="parkType-${pt.park_type}" value="${pt.park_type}" 
+                           onchange="updateCheckboxStyle(this)">
+                    <label for="parkType-${pt.park_type}">${pt.park_type}</label>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading park types for settings:', error);
+    }
 }
 
 function applyUserPreferences(forceApply = false) {

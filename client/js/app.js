@@ -62,6 +62,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup user authentication
     setupUserAuth();
 
+    // Setup recommendations
+    setupRecommendations();
+
+    // Setup floating buttons
+    if (typeof setupFloatingButtons === 'function') {
+        setupFloatingButtons();
+    }
+
+    // Load favorites if user is logged in
+    if (currentUser && typeof loadUserFavorites === 'function') {
+        loadUserFavorites();
+    }
+
+    // Update floating buttons
+    if (typeof updateFloatingButtons === 'function') {
+        updateFloatingButtons();
+    }
+
     // Setup buttons
     document.getElementById('resetViewBtn').addEventListener('click', resetView);
     document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);

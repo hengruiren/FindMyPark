@@ -29,6 +29,12 @@ async function fetchBoroughs() {
     return await response.json();
 }
 
+async function fetchParkTypes() {
+    const response = await fetch(`${API_BASE}/parks/types`);
+    if (!response.ok) throw new Error('Failed to load park types');
+    return await response.json();
+}
+
 async function fetchParkStats() {
     const response = await fetch(`${API_BASE}/parks/stats`);
     if (!response.ok) throw new Error('Failed to load statistics');
@@ -139,5 +145,45 @@ async function deleteReview(reviewId) {
         throw new Error(data.error || 'Failed to delete review');
     }
     return true;
+}
+
+// Recommendation API Functions
+async function fetchRecommendations(username, limit = 10) {
+    const response = await fetch(`${API_BASE}/recommendations/${username}?limit=${limit}`);
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(data.error || 'Failed to load recommendations');
+    }
+    return await response.json();
+}
+
+// Favorites API Functions
+async function fetchUserFavorites(username) {
+    const response = await fetch(`${API_BASE}/users/${username}/favorites`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.favorites || [];
+}
+
+async function addToFavorites(username, parkId) {
+    const response = await fetch(`${API_BASE}/users/${username}/favorites`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ park_id: parkId })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to add to favorites');
+    return data;
+}
+
+async function removeFromFavorites(username, parkId) {
+    const response = await fetch(`${API_BASE}/users/${username}/favorites`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ park_id: parkId })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to remove from favorites');
+    return data;
 }
 

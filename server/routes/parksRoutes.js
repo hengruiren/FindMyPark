@@ -8,6 +8,9 @@ const ParkController = require("../controllers/parkController");
 // Get all boroughs
 router.get("/boroughs", ParkController.getBoroughs);
 
+// Get all park types
+router.get("/types", ParkController.getParkTypes);
+
 // Get statistics
 router.get("/stats", ParkController.getStats);
 

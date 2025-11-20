@@ -43,6 +43,18 @@ const User = sequelize.define(
         this.setDataValue('preferences', value ? JSON.stringify(value) : null);
       },
     },
+    favorites: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: null,
+      get() {
+        const rawValue = this.getDataValue('favorites');
+        return rawValue ? JSON.parse(rawValue) : [];
+      },
+      set(value) {
+        this.setDataValue('favorites', value ? JSON.stringify(value) : JSON.stringify([]));
+      },
+    },
   },
   {
     tableName: "User",
