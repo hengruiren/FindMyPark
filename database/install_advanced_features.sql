@@ -22,3 +22,5 @@ SHOW TRIGGERS FROM findmypark_nyc;
 
 SELECT 'Installation Complete!' AS '';
 
+
+

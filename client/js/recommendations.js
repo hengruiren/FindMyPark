@@ -1,10 +1,13 @@
 // Recommendations Functions
 let currentRecommendations = null;
+let currentRecommendationType = 'rule-based'; // 'rule-based' or 'ai'
 
 function setupRecommendations() {
     const loadRecommendationsBtn = document.getElementById('loadRecommendationsBtn');
+    const loadAIRecommendationsBtn = document.getElementById('loadAIRecommendationsBtn');
+    const aiPromptInput = document.getElementById('aiPromptInput');
     
-    // Load recommendations button
+    // Load rule-based recommendations button
     if (loadRecommendationsBtn) {
         loadRecommendationsBtn.addEventListener('click', async () => {
             if (!currentUser) {
@@ -12,6 +15,18 @@ function setupRecommendations() {
                 return;
             }
             await loadRecommendations(currentUser.username);
+        });
+    }
+    
+    // Load AI recommendations button
+    if (loadAIRecommendationsBtn) {
+        loadAIRecommendationsBtn.addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('Please login to get AI recommendations');
+                return;
+            }
+            const prompt = aiPromptInput ? aiPromptInput.value : '';
+            await loadAIRecommendations(currentUser.username, prompt);
         });
     }
 }
@@ -26,12 +41,16 @@ async function loadRecommendations(username) {
     try {
         const data = await fetchRecommendations(username, 10);
         currentRecommendations = data;
+        currentRecommendationType = 'rule-based';
         
         // Display top 3 detailed recommendations
         displayTop3Recommendations(data.top3);
         
         // Display top 10 simple list
         displayTop10Recommendations(data.top10);
+        
+        // Show recommendation type badge
+        showRecommendationTypeBadge('Rule-Based Algorithm');
         
         if (loadBtn) {
             loadBtn.textContent = 'Refresh Recommendations';
@@ -42,6 +61,201 @@ async function loadRecommendations(username) {
         alert('Failed to load recommendations: ' + error.message);
         if (loadBtn) loadBtn.textContent = 'Get Recommendations';
     }
+}
+
+async function loadAIRecommendations(username, prompt = '') {
+    const loadBtn = document.getElementById('loadAIRecommendationsBtn');
+    const top3Container = document.getElementById('recommendationsTop3');
+    const top10Container = document.getElementById('recommendationsTop10');
+    
+    const originalText = loadBtn ? loadBtn.textContent : '';
+        if (loadBtn) loadBtn.textContent = 'AI Processing...';
+    
+    try {
+        const data = await fetchAIRecommendations(username, prompt, 5);
+        currentRecommendations = data;
+        currentRecommendationType = 'ai';
+        
+        // Display AI recommendations
+        displayAIRecommendations(data.recommendations, data.aiExplanation);
+        
+        // Clear top 10 list for AI (we only show top recommendations)
+        if (top10Container) top10Container.innerHTML = '';
+        
+        // Show recommendation type badge
+        showRecommendationTypeBadge('AI-Powered (GPT)', data.aiExplanation);
+        
+        if (loadBtn) {
+            loadBtn.textContent = 'Get AI Recommendations';
+        }
+    } catch (error) {
+        console.error('Error loading AI recommendations:', error);
+        
+        // Check if it's a configuration error
+        if (error.message.includes('API key not configured')) {
+            alert('⚠️ OpenAI API is not configured.\n\nPlease set up OPENAI_API_KEY in your .env file.\n\nSee setup instructions for details.');
+        } else {
+            alert('Failed to load AI recommendations: ' + error.message + '\n\nTry using the standard recommendations instead.');
+        }
+        
+        if (loadBtn) loadBtn.textContent = originalText || 'Get AI Recommendations';
+    }
+}
+
+function showRecommendationTypeBadge(type, explanation = '') {
+    const top3Container = document.getElementById('recommendationsTop3');
+    if (!top3Container) return;
+    
+    // Remove existing badge if any
+    const existingBadge = document.querySelector('.recommendation-type-badge');
+    if (existingBadge) existingBadge.remove();
+    
+    const badge = document.createElement('div');
+    badge.className = 'recommendation-type-badge';
+    badge.innerHTML = `
+        <div class="badge-content">
+            <span class="badge-text">${type}</span>
+        </div>
+        ${explanation ? `<div class="badge-explanation">${explanation}</div>` : ''}
+    `;
+    
+    top3Container.insertBefore(badge, top3Container.firstChild);
+}
+
+function displayAIRecommendations(recommendations, explanation) {
+    const container = document.getElementById('recommendationsTop3');
+    if (!container) return;
+    
+    if (!recommendations || recommendations.length === 0) {
+        container.innerHTML = `
+            <div class="no-recommendations">
+                <p>❌ No AI recommendations available.</p>
+                <p>This could be because:</p>
+                <ul>
+                    <li>OpenAI API is not configured</li>
+                    <li>No parks match your criteria</li>
+                    <li>API quota exceeded</li>
+                </ul>
+                <p>Try using the standard recommendations instead.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = recommendations.map((park, index) => {
+        const facilities = (park.Facilities || []);
+        const facilityTypes = [...new Set(facilities.map(f => f.facility_type))];
+        const trails = (park.Trails || []).length || 0;
+        const rating = parseFloat(park.avg_rating) || 0;
+        const reviews = (park.Reviews || []);
+        const score = park.aiMatchScore || 0;
+        const scorePercent = Math.round(score);
+        
+        // Score color based on value
+        let scoreColor = '#e74c3c'; // Red for low scores
+        if (scorePercent >= 80) scoreColor = '#27ae60'; // Green for high scores
+        else if (scorePercent >= 60) scoreColor = '#f39c12'; // Orange for medium scores
+        
+        return `
+            <div class="recommendation-card ai-recommendation-card" data-park-id="${park.park_id}">
+                <div class="recommendation-header">
+                    <div class="recommendation-header-left">
+                        <span class="recommendation-rank">#${index + 1}</span>
+                        <h3 class="recommendation-title">${park.park_name}</h3>
+                    </div>
+                    <div class="recommendation-score-simple">
+                        <span class="score-value">${scorePercent}</span>
+                        <span class="score-label">Score</span>
+                    </div>
+                </div>
+                <div class="ai-reason-box">
+                    <strong>Recommendation:</strong> ${park.aiReason || 'Recommended for you'}
+                </div>
+                <div class="recommendation-body">
+                    <div class="recommendation-stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-icon">📍</span>
+                            <div class="stat-content">
+                                <div class="stat-label">Borough</div>
+                                <div class="stat-value">${park.borough || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">🏞️</span>
+                            <div class="stat-content">
+                                <div class="stat-label">Type</div>
+                                <div class="stat-value">${park.park_type || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">⭐</span>
+                            <div class="stat-content">
+                                <div class="stat-label">Rating</div>
+                                <div class="stat-value">${rating > 0 ? rating.toFixed(1) + '/5.0' : 'No rating'}</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">📏</span>
+                            <div class="stat-content">
+                                <div class="stat-label">Size</div>
+                                <div class="stat-value">${park.acres ? parseFloat(park.acres).toFixed(1) + ' ac' : 'N/A'}</div>
+                            </div>
+                        </div>
+                        ${park.is_waterfront ? `
+                        <div class="stat-item">
+                            <span class="stat-icon">🌊</span>
+                            <div class="stat-content">
+                                <div class="stat-label">Waterfront</div>
+                                <div class="stat-value">Yes</div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="stat-item">
+                            <span class="stat-icon">🛤️</span>
+                            <div class="stat-content">
+                                <div class="stat-label">Trails</div>
+                                <div class="stat-value">${trails}</div>
+                            </div>
+                        </div>
+                    </div>
+                    ${facilityTypes.length > 0 ? `
+                    <div class="recommendation-facilities">
+                        <div class="facilities-header">
+                            <strong>🏃 Facilities (${facilities.length})</strong>
+                        </div>
+                        <div class="facility-tags">
+                            ${facilityTypes.slice(0, 8).map(type => `
+                                <span class="facility-tag">${type}</span>
+                            `).join('')}
+                            ${facilityTypes.length > 8 ? `<span class="facility-tag more">+${facilityTypes.length - 8}</span>` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    ${reviews.length > 0 ? `
+                        <div class="recommendation-reviews">
+                            <div class="reviews-header">
+                                <strong>💬 Recent Reviews (${reviews.length})</strong>
+                            </div>
+                            <div class="reviews-list">
+                                ${reviews.slice(0, 2).map(review => `
+                                    <div class="review-item">
+                                        <div class="review-header">
+                                            <strong>${review.User?.username || 'Anonymous'}</strong>
+                                            <span class="review-rating">⭐ ${review.rating}/5</span>
+                                        </div>
+                                        <div class="review-comment">${review.comment || 'No comment'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : '<div class="no-reviews">No reviews yet. Be the first to review!</div>'}
+                </div>
+                <button class="view-on-map-btn" onclick="viewParkOnMap('${park.park_id}')">
+                    View on Map
+                </button>
+            </div>
+        `;
+    }).join('');
 }
 
 function displayTop3Recommendations(top3) {
@@ -70,12 +284,14 @@ function displayTop3Recommendations(top3) {
         
         return `
             <div class="recommendation-card" data-park-id="${park.park_id}">
-                <div class="recommendation-rank-badge">#${index + 1}</div>
                 <div class="recommendation-header">
-                    <h3 class="recommendation-title">${park.park_name}</h3>
-                    <div class="recommendation-score-circle" style="--score-color: ${scoreColor}">
-                        <div class="score-value">${scorePercent}</div>
-                        <div class="score-label">Score</div>
+                    <div class="recommendation-header-left">
+                        <span class="recommendation-rank">#${index + 1}</span>
+                        <h3 class="recommendation-title">${park.park_name}</h3>
+                    </div>
+                    <div class="recommendation-score-simple">
+                        <span class="score-value">${scorePercent}</span>
+                        <span class="score-label">Score</span>
                     </div>
                 </div>
                 <div class="recommendation-body">
@@ -158,7 +374,7 @@ function displayTop3Recommendations(top3) {
                     ` : '<div class="no-reviews">No reviews yet. Be the first to review!</div>'}
                 </div>
                 <button class="view-on-map-btn" onclick="viewParkOnMap('${park.park_id}')">
-                    <span>🗺️</span> View on Map
+                    View on Map
                 </button>
             </div>
         `;

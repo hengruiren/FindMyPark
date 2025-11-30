@@ -7,3 +7,5 @@ ALTER TABLE User
 ADD COLUMN favorites TEXT COMMENT 'JSON array of favorite park_ids' 
 AFTER preferences;
 
+
+

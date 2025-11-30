@@ -86,7 +86,21 @@
                 Personalized Recommendations
             </h2>
             <div id="recommendationsContent">
-                <button id="loadRecommendationsBtn" class="recommendations-btn">Get Recommendations</button>
+                <div class="recommendations-controls">
+                    <div class="recommendation-type-selector">
+                        <button id="loadRecommendationsBtn" class="recommendations-btn">Get Smart Recommendations</button>
+                        <div class="ai-recommendation-section">
+                            <button id="loadAIRecommendationsBtn" class="recommendations-btn ai-btn">Get AI Recommendations</button>
+                            <div class="ai-prompt-container">
+                                <input type="text" 
+                                       id="aiPromptInput" 
+                                       placeholder="Optional: Describe what you're looking for (e.g., 'parks good for running')" 
+                                       class="ai-prompt-input">
+                                <small class="ai-hint">Leave empty for general AI recommendations based on your preferences</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="recommendationsTop3" class="recommendations-top3"></div>
                 <div id="recommendationsTop10" class="recommendations-top10"></div>
             </div>

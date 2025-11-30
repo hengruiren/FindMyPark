@@ -157,6 +157,28 @@ async function fetchRecommendations(username, limit = 10) {
     return await response.json();
 }
 
+// AI Recommendation API Functions
+async function fetchAIRecommendations(username, prompt = '', limit = 5) {
+    const queryParams = new URLSearchParams({ limit });
+    if (prompt) queryParams.append('prompt', prompt);
+    
+    const response = await fetch(`${API_BASE}/ai-recommendations/${username}?${queryParams}`);
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(data.error || 'Failed to load AI recommendations');
+    }
+    return await response.json();
+}
+
+async function compareRecommendations(username) {
+    const response = await fetch(`${API_BASE}/ai-recommendations/${username}/compare`);
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(data.error || 'Failed to compare recommendations');
+    }
+    return await response.json();
+}
+
 // Favorites API Functions
 async function fetchUserFavorites(username) {
     const response = await fetch(`${API_BASE}/users/${username}/favorites`);

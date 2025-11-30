@@ -62,3 +62,5 @@ async function addFavoritesColumn() {
 // Run the script
 addFavoritesColumn().catch(console.error);
 
+
+
