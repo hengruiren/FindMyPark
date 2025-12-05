@@ -530,3 +530,13 @@ function updateRecommendationsUI() {
     }
 }
 
+window.reloadPersonalizedRecommendations = async function() {
+    if (currentUser) {
+        console.log('Settings saved, reloading recommendations...');
+        const loadBtn = document.getElementById('loadRecommendationsBtn');
+        if (loadBtn) loadBtn.textContent = 'Updating...';
+        
+        currentRecommendations = null;
+        await loadRecommendations(currentUser.username);
+    }
+};

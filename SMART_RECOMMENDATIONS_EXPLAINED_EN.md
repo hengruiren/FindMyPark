@@ -1,6 +1,6 @@
 # Smart Recommendations System - How It Works
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [System Overview](#system-overview)
 2. [Workflow](#workflow)
@@ -11,7 +11,7 @@
 
 ---
 
-## 🎯 System Overview
+## System Overview
 
 The Smart Recommendations system is a **rule-based recommendation algorithm** that analyzes user preferences and park characteristics to calculate a recommendation score for each park, then ranks them from highest to lowest to recommend parks that best match user needs.
 
@@ -24,7 +24,7 @@ The Smart Recommendations system is a **rule-based recommendation algorithm** th
 
 ---
 
-## 🔄 Workflow
+## Workflow
 
 ### Step 1: Get User Preferences
 
@@ -71,7 +71,7 @@ Returns:
 
 ---
 
-## 📊 Scoring Algorithm Details
+## Scoring Algorithm Details
 
 The recommendation score is calculated using the following formula:
 
@@ -89,7 +89,7 @@ Total Score = Borough Match Score + Facility Match Score + Park Type Match Score
 
 ---
 
-## ⚖️ Weight Distribution
+## Weight Distribution
 
 The system uses the following weight distribution (total 125 points, normalized to 100):
 
@@ -106,7 +106,7 @@ The system uses the following weight distribution (total 125 points, normalized 
 
 ---
 
-## 🔢 Detailed Calculation Rules
+## Detailed Calculation Rules
 
 ### 1. Borough Match - 30 points
 
@@ -208,7 +208,7 @@ The system uses the following weight distribution (total 125 points, normalized 
 
 ---
 
-## 📝 Calculation Examples
+## Calculation Examples
 
 ### Example 1: Perfect Match
 
@@ -329,7 +329,7 @@ Final Score = 23.5 points (will rank very low)
 
 ---
 
-## ⚙️ User Preference Settings
+## User Preference Settings
 
 Users can configure the following preferences in the Settings page:
 
@@ -368,7 +368,7 @@ Users can configure the following preferences in the Settings page:
 
 ---
 
-## 🎯 Algorithm Characteristics
+## Algorithm Characteristics
 
 ### Advantages
 
@@ -385,7 +385,7 @@ Users can configure the following preferences in the Settings page:
 
 ---
 
-## 🔍 Code Location
+## Code Location
 
 The core code for the recommendation algorithm is located at:
 
@@ -399,7 +399,7 @@ Main functions:
 
 ---
 
-## 📊 Summary
+## Summary
 
 The Smart Recommendations system works as follows:
 
@@ -413,7 +413,7 @@ The Smart Recommendations system works as follows:
 
 ---
 
-## 💡 Usage Recommendations
+## Usage Recommendations
 
 ### For Users
 
