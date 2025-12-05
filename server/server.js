@@ -4,7 +4,15 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config();
+const fs = require("fs");
+
+// Load environment variables
+// Priority: .env (personal) > config.env (shared team config)
+// Load shared config first, then personal .env will override if it exists
+if (fs.existsSync(path.join(__dirname, "config.env"))) {
+  require("dotenv").config({ path: path.join(__dirname, "config.env") }); // Load shared config
+}
+require("dotenv").config(); // Load .env (will override shared config if exists)
 
 const { testConnection } = require("./config/dbConnection");
 
@@ -14,6 +22,9 @@ const facilitiesRoutes = require("./routes/facilitiesRoutes");
 const trailsRoutes = require("./routes/trailsRoutes");
 const reviewsRoutes = require("./routes/reviewsRoutes");
 const usersRoutes = require("./routes/usersRoutes");
+const recommendationsRoutes = require("./routes/recommendationsRoutes");
+const aiRecommendationsRoutes = require("./routes/aiRecommendationsRoutes");
+const storedProcedureRoutes = require("./routes/storedProcedureRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +46,9 @@ app.use("/api/facilities", facilitiesRoutes);
 app.use("/api/trails", trailsRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/recommendations", recommendationsRoutes);
+app.use("/api/ai-recommendations", aiRecommendationsRoutes);
+app.use("/api/stored-procedures", storedProcedureRoutes);
 
 // Serve static files from client directory
 app.use(express.static(path.join(__dirname, "../client")));

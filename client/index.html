@@ -75,6 +75,56 @@
         </div>
     </div>
 
+    <!-- Recommendations Modal -->
+    <div id="recommendationsModal" class="modal">
+        <div class="modal-content large-modal recommendations-modal">
+            <span class="close">&times;</span>
+            <h2>
+                <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 28px; height: 28px; display: inline-block; vertical-align: middle; margin-right: 10px;">
+                    <path d="M12 2L13.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L10.91 8.26L12 2Z"></path>
+                </svg>
+                Personalized Recommendations
+            </h2>
+            <div id="recommendationsContent">
+                <div class="recommendations-controls">
+                    <div class="recommendation-type-selector">
+                        <button id="loadRecommendationsBtn" class="recommendations-btn">Get Smart Recommendations</button>
+                        <div class="ai-recommendation-section">
+                            <button id="loadAIRecommendationsBtn" class="recommendations-btn ai-btn">Get AI Recommendations</button>
+                            <div class="ai-prompt-container">
+                                <input type="text" 
+                                       id="aiPromptInput" 
+                                       placeholder="Optional: Describe what you're looking for (e.g., 'parks good for running')" 
+                                       class="ai-prompt-input">
+                                <small class="ai-hint">Leave empty for general AI recommendations based on your preferences</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="recommendationsTop3" class="recommendations-top3"></div>
+                <div id="recommendationsTop10" class="recommendations-top10"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites Modal -->
+    <div id="favoritesModal" class="modal">
+        <div class="modal-content large-modal favorites-modal">
+            <span class="close">&times;</span>
+            <h2>
+                <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 28px; height: 28px; display: inline-block; vertical-align: middle; margin-right: 10px;">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                My Favorite Parks
+            </h2>
+            <p class="modal-description">Your saved parks. Click on a park to view it on the map, or remove it from favorites.</p>
+            <div id="favoritesListModal" class="favorites-list-modal">
+                <!-- Favorites will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content large-modal">
@@ -100,12 +150,92 @@
                 </div>
 
                 <div class="settings-section">
+                    <h3>📍 Preferred Boroughs</h3>
+                    <p class="section-description">Select your preferred boroughs for park recommendations.</p>
+                    <div class="facility-checkboxes" id="preferredBoroughs">
+                        <!-- Dynamic checkboxes will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🏞️ Preferred Park Types</h3>
+                    <p class="section-description">Select your preferred park types for recommendations.</p>
+                    <div class="facility-checkboxes" id="preferredParkTypes">
+                        <!-- Dynamic checkboxes will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🌊 Waterfront Preference</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="preferredWaterfront" value="yes">
+                            Prefer waterfront parks
+                        </label>
+                        <label>
+                            <input type="radio" name="preferredWaterfront" value="no">
+                            Prefer non-waterfront parks
+                        </label>
+                        <label>
+                            <input type="radio" name="preferredWaterfront" value="none" checked>
+                            No preference
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>⭐ Minimum Rating</h3>
+                    <div class="form-group">
+                        <label>
+                            Minimum Rating:
+                            <input type="number" id="minRating" min="0" max="5" step="0.1" value="0">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📏 Preferred Park Size</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="preferredSize" value="small">
+                            Small (< 5 acres)
+                        </label>
+                        <label>
+                            <input type="radio" name="preferredSize" value="medium">
+                            Medium (5-50 acres)
+                        </label>
+                        <label>
+                            <input type="radio" name="preferredSize" value="large">
+                            Large (> 50 acres)
+                        </label>
+                        <label>
+                            <input type="radio" name="preferredSize" value="" checked>
+                            No preference
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
                     <h3>⚙️ Display Preferences</h3>
                     <div class="form-group">
                         <label>
                             <input type="checkbox" id="showOnlyFavorites">
                             Automatically filter by favorite facilities when I login
                         </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>
+                        <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                        </svg>
+                        Favorite Parks
+                    </h3>
+                    <p class="section-description">Your saved parks. Click on a park to view it on the map, or remove it from favorites.</p>
+                    <div id="favoritesList" class="favorites-list">
+                        <!-- Favorites will be loaded here -->
                     </div>
                 </div>
 
@@ -191,6 +321,7 @@
                     </div>
                 </div>
             </div>
+
         </aside>
 
         <!-- Map Container (Right Side) -->
@@ -200,6 +331,22 @@
                 <button id="resetViewBtn" class="control-btn">Reset View</button>
                 <button id="clearFiltersBtn" class="control-btn">Clear Filters</button>
                 <button id="applyPreferencesBtn" class="control-btn" style="display: none;">Apply My Preferences</button>
+            </div>
+            
+            <!-- Floating Action Buttons -->
+            <div class="floating-buttons">
+                <button id="favoritesFloatingBtn" class="floating-btn favorites-btn" title="My Favorites" style="display: none;">
+                    <svg class="btn-icon tag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                    <span class="btn-badge" id="favoritesCount">0</span>
+                </button>
+                <button id="recommendationsFloatingBtn" class="floating-btn recommendations-btn" title="Get Recommendations" style="display: none;">
+                    <svg class="btn-icon sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L13.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L10.91 8.26L12 2Z"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -224,7 +371,10 @@
     <script src="js/utils.js"></script>
     <script src="js/reviews.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/favorites.js"></script>
     <script src="js/settings.js"></script>
+    <script src="js/recommendations.js"></script>
+    <script src="js/floatingButtons.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

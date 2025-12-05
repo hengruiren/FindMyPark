@@ -68,6 +68,18 @@ class UserController {
 
       // Return user info (without password)
       const { password_hash, ...userInfo } = user.toJSON();
+      
+      // Parse favorites if exists
+      if (userInfo.favorites && typeof userInfo.favorites === 'string') {
+        try {
+          userInfo.favorites = JSON.parse(userInfo.favorites);
+        } catch (e) {
+          userInfo.favorites = [];
+        }
+      } else if (!userInfo.favorites) {
+        userInfo.favorites = [];
+      }
+      
       res.json({ user: userInfo, message: "Login successful" });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -109,6 +121,17 @@ class UserController {
         } catch (e) {
           userData.preferences = null;
         }
+      }
+      
+      // Parse favorites if exists
+      if (userData.favorites && typeof userData.favorites === 'string') {
+        try {
+          userData.favorites = JSON.parse(userData.favorites);
+        } catch (e) {
+          userData.favorites = [];
+        }
+      } else if (!userData.favorites) {
+        userData.favorites = [];
       }
 
       res.json(userData);
@@ -162,6 +185,104 @@ class UserController {
       );
 
       res.json({ message: "Preferences updated successfully", preferences });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Get user favorites
+  static async getUserFavorites(req, res) {
+    try {
+      const { username } = req.params;
+      const user = await User.findOne({
+        where: { username },
+        attributes: ['user_id', 'username', 'favorites'],
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userData = user.toJSON();
+      const favorites = userData.favorites ? 
+        (typeof userData.favorites === 'string' ? JSON.parse(userData.favorites) : userData.favorites) : 
+        [];
+
+      res.json({ favorites });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Add park to favorites
+  static async addFavorite(req, res) {
+    try {
+      const { username } = req.params;
+      const { park_id } = req.body;
+
+      if (!park_id) {
+        return res.status(400).json({ error: "park_id is required" });
+      }
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userData = user.toJSON();
+      let favorites = userData.favorites ? 
+        (typeof userData.favorites === 'string' ? JSON.parse(userData.favorites) : userData.favorites) : 
+        [];
+
+      if (!Array.isArray(favorites)) {
+        favorites = [];
+      }
+
+      if (!favorites.includes(park_id)) {
+        favorites.push(park_id);
+        await User.update(
+          { favorites: JSON.stringify(favorites) },
+          { where: { username } }
+        );
+      }
+
+      res.json({ message: "Park added to favorites", favorites });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Remove park from favorites
+  static async removeFavorite(req, res) {
+    try {
+      const { username } = req.params;
+      const { park_id } = req.body;
+
+      if (!park_id) {
+        return res.status(400).json({ error: "park_id is required" });
+      }
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userData = user.toJSON();
+      let favorites = userData.favorites ? 
+        (typeof userData.favorites === 'string' ? JSON.parse(userData.favorites) : userData.favorites) : 
+        [];
+
+      if (!Array.isArray(favorites)) {
+        favorites = [];
+      }
+
+      favorites = favorites.filter(id => id !== park_id);
+      await User.update(
+        { favorites: JSON.stringify(favorites) },
+        { where: { username } }
+      );
+
+      res.json({ message: "Park removed from favorites", favorites });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -10,6 +10,7 @@ CREATE TABLE User (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     preferences TEXT COMMENT 'JSON string for user preferences (favorite facilities, display settings)',
+    favorites TEXT COMMENT 'JSON array of favorite park_ids',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
