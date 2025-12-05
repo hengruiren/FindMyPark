@@ -72,6 +72,10 @@ function setupUserSettings() {
             updateUserUI();
             applyUserPreferences();
 
+            if (typeof window.reloadPersonalizedRecommendations === 'function') {
+                window.reloadPersonalizedRecommendations();
+            }
+
             setTimeout(() => {
                 settingsModal.classList.remove('show');
                 successDiv.classList.remove('show');
