@@ -4,7 +4,15 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config();
+const fs = require("fs");
+
+// Load environment variables
+// Priority: .env (personal) > config.env (shared team config)
+// Load shared config first, then personal .env will override if it exists
+if (fs.existsSync(path.join(__dirname, "config.env"))) {
+  require("dotenv").config({ path: path.join(__dirname, "config.env") }); // Load shared config
+}
+require("dotenv").config(); // Load .env (will override shared config if exists)
 
 const { testConnection } = require("./config/dbConnection");
 
