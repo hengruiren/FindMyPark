@@ -536,7 +536,6 @@ window.reloadPersonalizedRecommendations = async function() {
         const loadBtn = document.getElementById('loadRecommendationsBtn');
         if (loadBtn) loadBtn.textContent = 'Updating...';
         
-        // 清空当前数据以强制 UI 更新
         currentRecommendations = null;
         await loadRecommendations(currentUser.username);
     }
